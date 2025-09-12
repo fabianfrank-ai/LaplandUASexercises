@@ -41,5 +41,5 @@ try :
      print("Please enter a number between 1 and 100")
 
 
-except:
+except ValueError:
     print("Something went wrong, try again. Remember to use whole numbers, no fractions or letters.")
