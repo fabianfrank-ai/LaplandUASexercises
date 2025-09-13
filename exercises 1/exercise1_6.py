@@ -11,6 +11,7 @@ try :
     if cents <= 100:
     #check how many of 50,20,10,etc fit into the given amount of cents
     #use % to get the remaining amount of cents and use the remainder in the following steps
+    #repeat until all cent pieces are calculated
      fifty_cents=cents // 50
      remaining_cents=cents % 50
 
