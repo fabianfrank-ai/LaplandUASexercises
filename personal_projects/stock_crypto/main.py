@@ -7,6 +7,7 @@ from indicators import sma, crossing, bollinger_bands, rsi
 from verdict import generate_verdict
 
 
+
 #change the style of the plot to dark mode (Hex colors used from ChatGPT, I don't like the default dark mode by matplotlib)
 plt.rcParams.update({
     "figure.facecolor": "#2e2e2e",  
@@ -21,12 +22,14 @@ plt.rcParams.update({
 })
 
 
-#Streamlit app layout
 
+#Streamlit app layout with title and description
 st.title ('Stock Price Viewer')
 st.write('This app fetches and displays historical stock price data using yfinance and Streamlit.')
 
 
+
+#create a sidebar with useful texts and information 
 with st.sidebar:
     with st.sidebar.expander('About this app'):
         st.write('This app was created by Fabian Frank. It uses yfinance to fetch stock data and Streamlit for the web interface. You can view stock prices along with technical indicators like Simple Moving Averages (SMA) and Bollinger Bands.')
@@ -81,24 +84,26 @@ ax2.set_ylabel('RSI')
 period=st.slider('Select Period', min_value=1, max_value=20, value=10, help='Select the number of years to fetch data for (1-20 years)')
 stock=st.text_input('Select Stock ticker (AMZN, MSFT, META)',  help='Select the stock symbol to fetch data for', value='AMZN')
 
+
+
 #fetch the stock data
 data=fetch_stock_data(stock, f'{period}y')
 data_sma_30=sma(data, 30)
 data_sma_100=sma(data, 100)
 
 
+
+#create the bollinger bands and rsi
 lower_band, upper_band= bollinger_bands(data, 30)
 rsi=rsi(data, 14)
 
+
+#create a verdict for the data(buy/hold/sell)
 verdict=generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
 
-#calculate the crosses between the two SMAs
-#crossings=crossing(data_sma_30, data_sma_100)
 
-#get x and y values for the crossings
-#x_intersections, y_intersections = zip(*crossings)
 
-#plot/scatter the data
+#plot the data
 ax.plot(data.index, data['Close'], label='Close Price', color='#4deeea')
 ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot', alpha=0.7)
 ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot', alpha=0.7)
@@ -110,13 +115,16 @@ ax2.axhline(30, color='limegreen', linestyle='--', alpha=0.5)
 ax2.set_ylim(0, 100)
 ax2.fill_between(rsi.index, rsi, 70, where=(rsi >= 70), color='red', alpha=0.3)
 ax2.fill_between(rsi.index, rsi, 30, where=(rsi <= 30), color='limegreen', alpha=0.3)
-#ax.scatter(x_intersections, y_intersections, label='Crossings', color='#ff0000', marker='x',zorder=5)
+
 
 
 #add a title and legend
 ax.set_title(f'{stock} Stock Price between {data.index[0].date()} and {data.index[-1].date()}')
 ax.legend()
 
+
+
+#Give the user feedback whether to buy,sell or hold a product
 if verdict=="Buy":
     st.success(f'Verdict: {verdict}. According to the indicators, it might be a good time to buy {stock}.')
 elif verdict=="Sell":
@@ -125,4 +133,5 @@ else:
     st.warning(f'Verdict: {verdict}. According to the indicators, it might be best to hold {stock} for now.')
 
 
+#create steamlit
 st.pyplot(fig)
