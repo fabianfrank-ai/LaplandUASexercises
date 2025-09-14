@@ -10,6 +10,8 @@ from database import insert_buy
 
 def market_screener():
    """Screen the market for potential buy opportunities in S&P 500 companies."""
+
+   
    #Get the list of S&P 500 companies from Wikipedia
    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -54,8 +56,14 @@ def market_screener():
 
 
 
+
+
+#I'm sure there is a better way to do this, but for now it works, open to suggestions
+
 def heatmap():
    """Generate a heatmap of S&P 500 companies based on their gain/loss percentage over the last day."""
+
+
    #Get the list of S&P 500 companies from Wikipedia
    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -63,7 +71,7 @@ def heatmap():
    tables = pd.read_html(html)
    
 
-   #create empty lists to store the data
+   #create empty lists to store the data, lists are then used to create a dataframe at the end
    ticker_data = []
    change_data = []
    verdict=[]

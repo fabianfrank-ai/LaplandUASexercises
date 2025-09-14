@@ -20,7 +20,7 @@ def color_code(val):
     else:
         color = '#000000'  # black for no change or invalid data
 
-    return 'background-color: {}'.format(color)
+    return 'background-color: {}'.format(color) # return the background color style as css string
 
 
 
@@ -30,6 +30,7 @@ def verdict_color(val):
     """Color code the verdict column."""
 
 
+    # give every verdict a specific color for the heatmap
     if val == 'Buy':
         color = '#00ff00'  # green
     elif val == 'Strong Buy':
@@ -43,13 +44,17 @@ def verdict_color(val):
     else:
         color = '#000000'  # black for invalid data
     
+
     return 'background-color: {}'.format(color)
+
 
 
 
 
 def rsi_color(val):
     """Color code the RSI values."""
+
+
     if val > 70:
         color = '#ff0000'  # red for overbought
     elif val < 30:
@@ -61,8 +66,12 @@ def rsi_color(val):
 
 
 
+
+
 def ema_color(val):
     """Color code the EMA values."""
+
+
     if val > 0:
         color = '#00ff00'  # green for bullish
     elif val < 0:
@@ -71,11 +80,15 @@ def ema_color(val):
         color = '#ffff00'  # yellow for neutral
 
     return 'background-color: {}'.format(color)
+
+
 
 
 
 def macd_color(val):
     """Color code the MACD values."""
+
+
     if val > 0:
         color = '#00ff00'  # green for bullish
     elif val < 0:
@@ -85,8 +98,14 @@ def macd_color(val):
 
     return 'background-color: {}'.format(color)
 
+
+
+
+
 def sma_color(val):
     """Color code the SMA values."""
+
+
     if val > 0.3:
         color = '#00ff00'  # green for bullish
     elif val < -0.3:
@@ -97,8 +116,13 @@ def sma_color(val):
     return 'background-color: {}'.format(color)
 
 
+
+
+
 def bollinger_color(val):
     """Color code the Bollinger Band values."""
+
+
     if val > 0.8:
         color = '#00ff00'  # green for strong position
     elif val < 0.2:

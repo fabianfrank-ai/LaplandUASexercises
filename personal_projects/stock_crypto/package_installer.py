@@ -12,7 +12,7 @@ packages = [
     'sys'
 ]
 
-def install(packages):
+def install(package):
     for p in packages:
         try:
             __import__(p)
