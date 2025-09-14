@@ -12,7 +12,6 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     #at the beginning of the function, set the signals to 0, as there is no data yet
     buy_signals=0
     sell_signals=0
-    
 
 
     #SMA signal
@@ -73,10 +72,14 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
      
 
     #return verdict
-    if buy_signals >=3:
+    if buy_signals >=3 and buy_signals <5:
         return "Buy"
-    elif sell_signals >=3:
+    if buy_signals==5:
+        return "Strong Buy"
+    elif sell_signals >=3 and sell_signals <5:
         return "Sell"
+    elif sell_signals==5:
+        return "Strong Sell"
     else:
         return "Hold"
     

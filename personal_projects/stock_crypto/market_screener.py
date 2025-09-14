@@ -3,7 +3,7 @@
 import pandas as pd
 import urllib.request
 from fetch_data import fetch_stock_data
-from indicators import sma, bollinger_bands, rsi
+from indicators import sma, bollinger_bands, rsi, ema, macd
 from verdict import generate_verdict
 from database import insert_buy
 
@@ -50,4 +50,94 @@ def market_screener():
       except Exception as e:
          print(f"Error processing {ticker}: {e}")
          continue
+
+
+
+
+def heatmap():
+   """Generate a heatmap of S&P 500 companies based on their gain/loss percentage over the last day."""
+   #Get the list of S&P 500 companies from Wikipedia
+   url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+   req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+   html = urllib.request.urlopen(req).read()
+   tables = pd.read_html(html)
+   
+
+   #create empty lists to store the data
+   ticker_data = []
+   change_data = []
+   verdict=[]
+   sma_data = []
+   bollinger_data = []
+   rsi_data = []
+   ema_data = []
+   macd_data = []
+
+
+   #filter all the tickers from the table on wikipedia
+   sp500_tickers = tables[0]['Symbol'].tolist()
+
+
+   #for every ticker in sp500
+   for ticker in sp500_tickers:
+      try:
+         
+         #fetch data
+         data = fetch_stock_data(ticker, "6mo")
+
+         
+         #check if data is valid
+         if data is None or len(data) < 2:
+            print(f"Not enough data for {ticker}")
+            continue
+
+
+         #calculate the percentage change from the previous close to the latest close
+         latest_close = data['Close'].iloc[-1]
+         previous_close = data['Close'].iloc[-2]
+         latest_change = ((latest_close - previous_close) / previous_close) * 100
+
+
+         #append all the data to the respective lists
+         ticker_data.append(ticker)
+         change_data.append(latest_change)
+
+
+         #calculate indicators for the ticker and append the relevant data to the respective lists
+         sma_data.append(sma(data,30).iloc[-1] - sma(data,100).iloc[-1])
+         lower_band, upper_band = bollinger_bands(data,30)
+         bollinger_data.append((data['Close'].iloc[-1] - lower_band.iloc[-1]) / (upper_band.iloc[-1] - lower_band.iloc[-1]))
+         rsi_data.append(rsi(data,14).iloc[-1])
+         ema_data.append(ema(data,12).iloc[-1] - ema(data,26).iloc[-1])
+         macd_line, signal_line = macd(data)
+         macd_data.append(macd_line.iloc[-1] - signal_line.iloc[-1])
+
+
+         #generate and append the verdict for the ticker
+         verdict.append(generate_verdict(data, sma(data,30), sma(data,100), *bollinger_bands(data,30), rsi(data,14)))
+ 
+
+         #create a dataframe from the lists
+         df=pd.DataFrame({
+         'Ticker': ticker_data,
+         'Change': change_data,
+         'SMA Diff': sma_data,
+         'Bollinger %': bollinger_data,
+         'RSI': rsi_data,
+         'EMA Diff': ema_data,
+         'MACD Diff': macd_data,
+         'Verdict': verdict
+          })
+        
+
+   
+      
+      #Print any errors and continue with the next ticker
+      except Exception as e:
+         print(f"Error processing {ticker}: {e}")
+         continue
+
+
+#return the dataframe
+   return df
 

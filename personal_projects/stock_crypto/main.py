@@ -1,11 +1,15 @@
 import yfinance as yf  #suggested by chatgpt
 import streamlit as st
-import sqlite3
 import matplotlib.pyplot as plt
 from fetch_data import fetch_stock_data
 from indicators import sma, crossing, bollinger_bands, rsi, price_change, ema, macd
 from verdict import generate_verdict
-from market_screener import market_screener
+from market_screener import market_screener, heatmap
+from colour_coding import color_code, verdict_color, rsi_color, ema_color, macd_color, sma_color, bollinger_color
+from package_installer import install
+
+#install missing packages
+install(['streamlit', 'pandas', 'yfinance', 'matplotlib', 'sqlite3', 'urllib', 'subprocess', 'sys'])
 
 
 #change the style of the plot to dark mode (Hex colors used from ChatGPT, I don't like the default dark mode by matplotlib)
@@ -29,7 +33,7 @@ st.write('This app fetches and displays historical stock price data using yfinan
 
 
 
-#create a sidebar with useful texts and information 
+#create a sidebar with useful texts and information and some instructions
 with st.sidebar:
     with st.sidebar.expander('About this app'):
         st.write('This app was created by Fabian Frank. It uses yfinance to fetch stock data and Streamlit for the web interface. You can view stock prices along with technical indicators like Simple Moving Averages (SMA) and Bollinger Bands.')
@@ -48,11 +52,6 @@ with st.sidebar:
         st.write('3. The app will display the stock price along with the 30-day and 100-day SMAs and Bollinger Bands on the chart.')
     with st.sidebar.expander('What are Stock Tickers and where can I find them ?'):
         st.write('You can find stock ticker symbols on financial websites like Yahoo Finance, Google Finance, or your brokerage platform. Common examples include AAPL for Apple, MSFT for Microsoft, and AMZN for Amazon.') 
-    with st.sidebar.expander('Future Improvements'):
-        st.write('- Add more technical indicators like RSI, MACD, etc.')
-        st.write('- Implement user authentication for saving preferences.')
-        st.write('- Add news sentiment analysis related to the selected stock.')
-        st.write('Crypto data integration (e.g., Bitcoin, Ethereum).')
     with st.sidebar.expander('How does the verdict work?'):
         st.write('The verdict is generated based on five technical indicators: Simple Moving Averages (SMA), Bollinger Bands,Exponential Moving Average(EMA), Moving Average Convergance Divergence and Relative Strength Index (RSI).')
         st.write('The rules for generating the verdict are as follows:')
@@ -76,11 +75,21 @@ with st.sidebar:
         options = ['SMA', 'Bollinger Bands', 'EMA', 'MACD', 'RSI']
         selected_indicators = st.multiselect('Select Indicators to Display', options, default=['SMA', 'Bollinger Bands', 'RSI'])
         st.write('You can select which technical indicators to display on the chart. By default, SMA, Bollinger Bands, and RSI are selected.')
+    with st.sidebar.expander('Future Improvements'):
+        st.write('- Add more technical indicators like Volume, Stochastic Oscillator, etc.')
+        st.write('- Implement user authentication for saving preferences.')
+        st.write('- Allow users to save and compare multiple stocks.')
+        st.write('- Integrate real-time data updates for live stock prices.')
+        st.write('- Add educational resources about stock trading and technical analysis.')
 
-    
 
-#create a matplotlib figure and axis
-fig ,(ax,ax2)=plt.subplots(2,1, figsize=(16,20), sharex=True)
+
+#create a matplotlib figure and axis, so both axes can share the same x axis
+#the first axis will be used for the stock price and the second for the rsi and macd
+#the figsize is set to 16:9 ratio, as it is the most common screen ratio
+fig ,(ax,ax2) = plt.subplots(2,1, figsize=(16,20), sharex=True)
+fig.tight_layout(pad=5.0)
+
 
 
 #name the axes and add a grid
@@ -91,6 +100,7 @@ ax2.grid()
 ax2.set_ylabel('RSI')
 
 
+
 #user inputs for stock ticker and period as streamlit widgets
 period=st.slider('Select Period', min_value=1, max_value=20, value=10, help='Select the number of years to fetch data for (1-20 years)')
 stock=st.text_input('Select Stock ticker (AMZN, MSFT, META)',  help='Select the stock symbol to fetch data for', value='AMZN')
@@ -98,30 +108,57 @@ stock=st.text_input('Select Stock ticker (AMZN, MSFT, META)',  help='Select the 
 
 
 #fetch the stock data
-data=fetch_stock_data(stock, f'{period}y')
+data = fetch_stock_data(stock, f'{period}y')
 
 
-data_sma_30=sma(data, 30)
-data_sma_100=sma(data, 100)
+#handle errors in case the stock ticker is invalid
+if data is None or data.empty:
+    st.error('Error fetching data. Please check the stock ticker symbol and try again.')
+    st.stop()
 
-ema_12=ema(data, 12)
-ema_26=ema(data, 26)
 
-macd_line, signal_line=macd(data)
+#create the smas, ema, macd and other indicators
+data_sma_30 = sma(data, 30) 
+data_sma_100 = sma(data, 100)
+
+
+ema_12 = ema(data, 12)
+ema_26 = ema(data, 26)
+
+
+macd_line, signal_line = macd(data)
 
 
 #create the bollinger bands and rsi
-lower_band, upper_band= bollinger_bands(data, 30)
-rsi=rsi(data, 14)
+lower_band, upper_band = bollinger_bands(data, 30)
+rsi = rsi(data, 14)
+
 
 
 #create a verdict for the data(buy/hold/sell)
-verdict=generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
-
-price_change=price_change(data)
+verdict = generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
 
 
-#plot the data
+
+#calculate the price change percentage over the selected period
+price_change = price_change(data)
+
+if st.button('Show S&P 500 Heatmap', help='Click to generate a heatmap of S&P 500 companies based on their gain/loss percentage over the last day'):
+    with st.spinner('Generating heatmap... This may take a moment.'):
+        heatmap_data = heatmap()
+    st.write('S&P 500 Daily Change Percentage:')
+    st.dataframe(heatmap_data.style
+                 .applymap(color_code, subset=['Change'])
+                 .applymap(verdict_color, subset=['Verdict'])
+                 .applymap(sma_color, subset=['SMA Diff'])
+                 .applymap(rsi_color, subset=['RSI'])
+                 .applymap(bollinger_color, subset=['Bollinger %'])
+                 .applymap(ema_color, subset=['EMA Diff'])
+                 .applymap(macd_color, subset=['MACD Diff']))
+
+
+##plot the data
+#check if the price change is positive or negative and change the background color accordingly
 if price_change>0:
     ax.set_facecolor('#003f3f')  #dark green background for positive price change
     ax.plot(data.index, data['Close'], label=f'Close Price \u25B2 {price_change}%', color='white')
@@ -129,6 +166,8 @@ else:
     ax.set_facecolor('#3f0000')  #dark red background for negative price change
     ax.plot(data.index, data['Close'], label=f'Close Price \u25BC {price_change}%', color='#ff4d4d')
 
+
+#plot the selected indicators, if any are selected
 if 'SMA' in selected_indicators:
     ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot')
     ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot')
@@ -142,7 +181,6 @@ if 'MACD' in selected_indicators:
     ax2.plot(macd_line.index, macd_line, label='MACD Line', color='#00ff00')
     ax2.plot(signal_line.index, signal_line, label='Signal Line', color='#ff0000')
     ax2.axhline(0, color='grey', linestyle='--')
-
 if 'RSI' in selected_indicators:
     ax2.plot(rsi.index, rsi, label='14 Day RSI', color='#ffa500')
     ax2.axhline(70, color='red', linestyle='--')
@@ -162,12 +200,18 @@ ax2.legend()
 
 #Give the user feedback whether to buy,sell or hold a product
 if verdict=="Buy":
-    st.success(f'Verdict: {verdict}. According to the indicators, it might be a good time to buy {stock}.')
+    st.success(f'Verdict: {verdict}. According to the indicators, it might be a good time to buy {stock}. Look at the sidebar for an explanation!')
+elif verdict=="Strong Buy":
+    st.success(f'Verdict: {verdict}. According to the indicators, it might be a very good time to buy {stock}. Look at the sidebar for an explanation!')
+elif verdict=="Strong Sell":
+    st.error(f'Verdict: {verdict}. According to the indicators, it might be a very good time to sell {stock}.')
 elif verdict=="Sell":
     st.error(f'Verdict: {verdict}. According to the indicators, it might be a good time to sell {stock}.')
 else:
     st.warning(f'Verdict: {verdict}. According to the indicators, it might be best to hold {stock} for now.')
 
 
-#create steamlit
+
+
+#create steamlit plot
 st.pyplot(fig)

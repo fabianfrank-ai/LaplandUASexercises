@@ -27,7 +27,7 @@ def insert_stock_data(data):
 
 
 #function to insert all buy prices detected(if i opt to use it)
-def insert_buy(data):
+def insert_buy(date, ticker, data):
     """insert data into the database"""
 
     conn = sqlite3.connect('stock_data.db')
