@@ -2,8 +2,5 @@ pandas
 datetime
 matplotlib
 streamlit
-sqlite3
 yfinance
-urllib
-subprocess
-sys
+
