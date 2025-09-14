@@ -3,9 +3,9 @@ import streamlit as st
 import sqlite3
 import matplotlib.pyplot as plt
 from fetch_data import fetch_stock_data
-from indicators import sma, crossing, bollinger_bands, rsi
+from indicators import sma, crossing, bollinger_bands, rsi, price_change, ema, macd
 from verdict import generate_verdict
-
+from market_screener import market_screener
 
 
 #change the style of the plot to dark mode (Hex colors used from ChatGPT, I don't like the default dark mode by matplotlib)
@@ -35,37 +35,48 @@ with st.sidebar:
         st.write('This app was created by Fabian Frank. It uses yfinance to fetch stock data and Streamlit for the web interface. You can view stock prices along with technical indicators like Simple Moving Averages (SMA) and Bollinger Bands.')
         st.write('Feel free to explore and modify the code for your own projects!')
         st.write('DISCLAIMER: This app is for educational purposes only and should not be used for real trading decisions. Always do your own research and consult with a financial advisor before making investment decisions.')
-    with st.sidebar.expander('What are SMAs and Bollinger Bands?'):
-        st.write('Simple Moving Averages (SMA) are used to smooth out price data and identify trends by averaging closing prices over a specified period. For example, a 30-day SMA averages the closing prices of the last 30 days.')
-        st.write('Bollinger Bands consist of a middle band (SMA), an upper band, and a lower band. The upper band is typically 2 standard deviations above the SMA, and the lower band is 2 standard deviations below the SMA. They help identify overbought or oversold conditions in the market.')
+    with st.sidebar.expander('SMA? Bollinger Bands?,RSI?, MACD?, EMA?'):
+        st.write('Simple Moving Averages (SMA) smooth out price data to identify trends. The 30-day SMA reacts faster to price changes than the 100-day SMA.')
+        st.write('Bollinger Bands consist of a middle band (SMA), an upper band, and a lower band. Prices near the upper band may indicate overbought conditions, while prices near the lower band may indicate oversold conditions.')
+        st.write('Relative Strength Index (RSI) measures the speed and change of price movements. An RSI above 70 indicates overbought conditions, while an RSI below 30 indicates oversold conditions.')
+        st.write('Exponential Moving Average (EMA) gives more weight to recent prices, making it more responsive to new information.')
+        st.write('Moving Average Convergence Divergence (MACD) is a trend-following momentum indicator that shows the relationship between two moving averages of a security’s price.')
+        st.write('These indicators help traders make informed decisions about buying or selling stocks.')
     with st.sidebar.expander('Instructions'):
         st.write('1. Select the stock ticker symbol (e.g., AMZN, MSFT, META) in the input box.')
         st.write('2. Use the slider to choose the period (in years) for which you want to fetch historical data. Note: indicatiors like SMA and Bollinger Bands are more visiblie with smaller periods')
         st.write('3. The app will display the stock price along with the 30-day and 100-day SMAs and Bollinger Bands on the chart.')
     with st.sidebar.expander('What are Stock Tickers and where can I find them ?'):
-        st.write('You can find stock ticker symbols on financial websites like Yahoo Finance, Google Finance, or your brokerage platform. Common examples include AAPL for Apple, MSFT for Microsoft, and AMZN for Amazon.')
-    with st.sidebar.expander('Hot contenders'):
-        st.write("Here are all buy suggestions from the S&P 500 by the program! ")
-        st.write("Remember to do your own research before investing in any stock!")
+        st.write('You can find stock ticker symbols on financial websites like Yahoo Finance, Google Finance, or your brokerage platform. Common examples include AAPL for Apple, MSFT for Microsoft, and AMZN for Amazon.') 
     with st.sidebar.expander('Future Improvements'):
         st.write('- Add more technical indicators like RSI, MACD, etc.')
         st.write('- Implement user authentication for saving preferences.')
         st.write('- Add news sentiment analysis related to the selected stock.')
         st.write('Crypto data integration (e.g., Bitcoin, Ethereum).')
     with st.sidebar.expander('How does the verdict work?'):
-        st.write('The verdict is generated based on three technical indicators: Simple Moving Averages (SMA), Bollinger Bands, and Relative Strength Index (RSI).')
+        st.write('The verdict is generated based on five technical indicators: Simple Moving Averages (SMA), Bollinger Bands,Exponential Moving Average(EMA), Moving Average Convergance Divergence and Relative Strength Index (RSI).')
         st.write('The rules for generating the verdict are as follows:')
-        st.write('- If 2 or more indicators suggest a "Buy" signal, the verdict is "Buy".')
-        st.write('- If 2 or more indicators suggest a "Sell" signal, the verdict is "Sell".')
-        st.write('- If only 1 indicator suggests a "Buy" or "Sell" signal, the verdict is "Hold".')
+        st.write('- If 3 or more indicators suggest a "Buy" signal, the verdict is "Buy".')
+        st.write('- If 3 or more indicators suggest a "Sell" signal, the verdict is "Sell".')
+        st.write('- If only 1 or 2 indicators suggests a "Buy" or "Sell" signal, the verdict is "Hold".')
         st.write('- If none of the indicators suggest a "Buy" or "Sell" signal, the verdict is "Hold".')
         st.write('Note: This is a simplified approach for educational purposes and should not be used for real trading decisions.')
-    with st.sidebar.expander('Contact'):
-        st.write('For any questions or suggestions, feel free to reach out to me on:')
-        st.write('- [GitHub](fabianfrank-ai)')
-        st.write('- email: frankfabian945@outlook.de')
-        st.write('- Discord: tntgurke94')
-        
+    with st.sidebar.expander('Signal Searcher'):
+        st.write('The Signal Searcher is a tool that scans the S&P 500 companies to identify potential buy opportunities based on technical indicators. It fetches data for each company, calculates indicators like SMA, Bollinger Bands, and RSI, and generates a verdict (Buy, Sell, Hold) for each stock.')
+        st.write('If a stock receives a "Buy" verdict from the indicators, it is highlighted as a potential buy opportunity. This tool helps users discover stocks that may be worth further research and consideration for investment.')
+        st.write('Note: The Signal Searcher is for educational purposes only and should not be used for real trading decisions. Always conduct your own research and consult with a financial advisor before making investment decisions.')
+        if st.button('Run Signal Searcher', help='Click to scan the S&P 500 for potential buy opportunities'):
+            result = market_screener()
+            if result:
+                ticker, verdict = result
+                st.success(f'Potential Buy Opportunity Found: {ticker} - Verdict: {verdict}')
+            else:
+                st.info('No Buy Opportunities Found at this time.')
+    with st.sidebar.expander('Indicators'):
+        options = ['SMA', 'Bollinger Bands', 'EMA', 'MACD', 'RSI']
+        selected_indicators = st.multiselect('Select Indicators to Display', options, default=['SMA', 'Bollinger Bands', 'RSI'])
+        st.write('You can select which technical indicators to display on the chart. By default, SMA, Bollinger Bands, and RSI are selected.')
+
     
 
 #create a matplotlib figure and axis
@@ -88,9 +99,15 @@ stock=st.text_input('Select Stock ticker (AMZN, MSFT, META)',  help='Select the 
 
 #fetch the stock data
 data=fetch_stock_data(stock, f'{period}y')
+
+
 data_sma_30=sma(data, 30)
 data_sma_100=sma(data, 100)
 
+ema_12=ema(data, 12)
+ema_26=ema(data, 26)
+
+macd_line, signal_line=macd(data)
 
 
 #create the bollinger bands and rsi
@@ -101,26 +118,45 @@ rsi=rsi(data, 14)
 #create a verdict for the data(buy/hold/sell)
 verdict=generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
 
+price_change=price_change(data)
 
 
 #plot the data
-ax.plot(data.index, data['Close'], label='Close Price', color='#4deeea')
-ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot', alpha=0.7)
-ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot', alpha=0.7)
-ax.plot(upper_band.index, upper_band, label='Upper Bollinger Band', color='limegreen', linestyle='--', alpha=0.5)
-ax.plot(lower_band.index, lower_band, label='Lower Bollinger Band', color='red', linestyle='--', alpha=0.5)
-ax2.plot(rsi.index, rsi, label='14 Day RSI', color='#ffa500')
-ax2.axhline(70, color='red', linestyle='--', alpha=0.5)
-ax2.axhline(30, color='limegreen', linestyle='--', alpha=0.5)
-ax2.set_ylim(0, 100)
-ax2.fill_between(rsi.index, rsi, 70, where=(rsi >= 70), color='red', alpha=0.3)
-ax2.fill_between(rsi.index, rsi, 30, where=(rsi <= 30), color='limegreen', alpha=0.3)
+if price_change>0:
+    ax.set_facecolor('#003f3f')  #dark green background for positive price change
+    ax.plot(data.index, data['Close'], label=f'Close Price \u25B2 {price_change}%', color='white')
+else:
+    ax.set_facecolor('#3f0000')  #dark red background for negative price change
+    ax.plot(data.index, data['Close'], label=f'Close Price \u25BC {price_change}%', color='#ff4d4d')
+
+if 'SMA' in selected_indicators:
+    ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot')
+    ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot')
+if 'Bollinger Bands' in selected_indicators:
+    ax.plot(upper_band.index, upper_band, label='Upper Bollinger Band', color='limegreen', linestyle='--')
+    ax.plot(lower_band.index, lower_band, label='Lower Bollinger Band', color='red', linestyle='--')
+if 'EMA' in selected_indicators:
+    ax.plot(ema_12.index, ema_12, label='12 Day EMA', color="#99f5ff", linestyle='dotted')
+    ax.plot(ema_26.index, ema_26, label='26 Day EMA', color='#ff00ff', linestyle='dotted')
+if 'MACD' in selected_indicators:
+    ax2.plot(macd_line.index, macd_line, label='MACD Line', color='#00ff00')
+    ax2.plot(signal_line.index, signal_line, label='Signal Line', color='#ff0000')
+    ax2.axhline(0, color='grey', linestyle='--')
+
+if 'RSI' in selected_indicators:
+    ax2.plot(rsi.index, rsi, label='14 Day RSI', color='#ffa500')
+    ax2.axhline(70, color='red', linestyle='--')
+    ax2.axhline(30, color='limegreen', linestyle='--')
+    ax2.fill_between(rsi.index, rsi, 70, where=(rsi >= 70), color='red', alpha=0.3)
+    ax2.fill_between(rsi.index, rsi, 30, where=(rsi <= 30), color='limegreen', alpha=0.3)
 
 
 
 #add a title and legend
 ax.set_title(f'{stock} Stock Price between {data.index[0].date()} and {data.index[-1].date()}')
 ax.legend()
+ax2.legend()
+
 
 
 

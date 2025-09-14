@@ -1,4 +1,4 @@
-#Verdict.py tries to use the sma, bollinger bands and rsi in order to create a verdict how the user should trade
+#Verdict.py tries to use the sma, bollinger bands,ema and macd and rsi in order to create a verdict how the user should trade
 #The verdict is based on the following rules:
 #Out of the 3 indicators, if 2 or more indicate buy/sell, the verdict is buy/sell
 #If only 1 indicator indicates buy/sell, the verdict is hold
@@ -6,6 +6,7 @@
 #Note: This is a very simple approach and should not be used for real trading decisions. It is just for educational purposes.
 
 import pandas as pd
+from indicators import ema, macd
 
 def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     #at the beginning of the function, set the signals to 0, as there is no data yet
@@ -13,11 +14,14 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     sell_signals=0
     
 
+
     #SMA signal
-    #as market prices vary, we will use the percantage difference between long and short SMA
+    #as market prices may vary, we will use the percantage difference between long and short SMA
     sma_diff=(short_sma - long_sma) / long_sma * 100
 
 
+
+   #use 0.3 as threshold to decide whether the difference between sma differences is noteworthy enough
     if sma_diff.iloc[-1] > 0.3: 
         buy_signals += 1
     elif sma_diff.iloc[-1] < -0.3:
@@ -25,6 +29,7 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     else:
         pass  # No signal from SMA
 
+ 
 
     #Bollinger Bands signal
     if upper_band.iloc[-1] < data['Close'].iloc[-1]:  # Price above upper band
@@ -33,6 +38,8 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
         buy_signals += 1
     else:
         pass  # No signal from Bollinger Bands
+    
+
 
     #RSI signal
     if rsi.iloc[-1] > 70:  # Overbought
@@ -42,9 +49,33 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     else:
         pass  # No signal from RSI
 
-    if buy_signals >=2:
+    #EMA signal
+    #Ema will not be seen in the graph as of now, but it is calculated here to be used in the verdict
+    ema_short=ema(data, 12)
+    ema_long=ema(data, 26)
+    if ema_short.iloc[-1] > ema_long.iloc[-1]:
+        buy_signals += 1
+    elif ema_short.iloc[-1] < ema_long.iloc[-1]:
+        sell_signals += 1
+    else:
+        pass  # No signal from EMA
+
+
+    #MACD signal
+    #MACD will not be seen in the graph as of now, but it is calculated here to be used in the verdict
+    macd_line, signal_line=macd(data)
+    if macd_line.iloc[-1] > signal_line.iloc[-1]:
+        buy_signals += 1
+    elif macd_line.iloc[-1] < signal_line.iloc[-1]:
+        sell_signals += 1
+    else:
+        pass  # No signal from MACD
+     
+
+    #return verdict
+    if buy_signals >=3:
         return "Buy"
-    elif sell_signals >=2:
+    elif sell_signals >=3:
         return "Sell"
     else:
         return "Hold"

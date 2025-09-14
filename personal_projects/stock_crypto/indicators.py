@@ -4,15 +4,19 @@ import pandas as pd
 sma=pd.DataFrame()
 crossings=[]
 
+
+
 def sma(data, window):
     """Calculate Simple Moving Average (SMA)"""
-    #SMA = sum of closing prices over the window / window size (SMA20 is used, so window=20)
+    #SMA = sum of closing prices over the window / window size (SMA30 and 100 are used, so window=100)
     #https://medium.com/analytics-vidhya/sma-short-moving-average-in-python-c656956a08f8
     
     sma=data['Close'].rolling(window=window).mean()
     return sma
 
 
+
+#in construction
 def crossing(short_sma, long_sma):
     """Return a DataFrame with the crossing points of short and long SMA."""
     for i in range(1, len(short_sma)):
@@ -24,6 +28,7 @@ def crossing(short_sma, long_sma):
             return crossings
     return []
    
+
 
 def bollinger_bands(data,window):
     """Calculate Bollinger Bands"""
@@ -38,6 +43,7 @@ def bollinger_bands(data,window):
     return lower_band, upper_band
 
 
+
 def rsi(data, window):
     """Calculate Relative Strength Index (RSI)"""
     #RSI = 100 - (100 / (1 + RS))
@@ -49,6 +55,36 @@ def rsi(data, window):
     rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
     return rsi
+
+
+
+def price_change(data):
+    """Calculate Price Change Percentage"""
+    #Price Change Percentage = ((Current Price - Previous Price) / Previous Price) * 100
+    price_change=((data['Close'].iloc[-1] - data['Close'].iloc[0]) / data['Close'].iloc[0]) *100
+    return price_change.round(2)
+
+
+
+def ema(data, window):
+    """Calculate Exponential Moving Average (EMA)"""
+    #EMA gives more weight to recent prices, making it more responsive to new information.
+    #EMA_today = (Price_today * (smoothing / (1 + window))) + (EMA_yesterday * (1 - (smoothing / (1 + window))))
+    #A common smoothing factor is 2.
+    ema = data['Close'].ewm(span=window, adjust=False).mean()
+    return ema
+
+
+
+def macd(data, short_window=12, long_window=26, signal_window=9):
+    """Calculate Moving Average Convergence Divergence (MACD)"""
+    #MACD = 12-day EMA - 26-day EMA
+    #Signal Line = 9-day EMA of MACD
+    ema_short = ema(data, short_window)
+    ema_long = ema(data, long_window)
+    macd_line = ema_short - ema_long
+    signal_line = macd_line.ewm(span=signal_window, adjust=False).mean()
+    return macd_line, signal_line
 
 
 # Further indicators can be added here in the future

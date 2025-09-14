@@ -1,0 +1,9 @@
+In my stock data program i used following modules:
+
+pandas
+datatime
+matplotlib
+streamlit
+sqlite3
+yfinance
+urllib
