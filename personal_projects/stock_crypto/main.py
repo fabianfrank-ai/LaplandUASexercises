@@ -6,10 +6,7 @@ from indicators import sma, crossing, bollinger_bands, rsi, price_change, ema, m
 from verdict import generate_verdict
 from market_screener import market_screener, heatmap
 from colour_coding import color_code, verdict_color, rsi_color, ema_color, macd_color, sma_color, bollinger_color
-from package_installer import install
 
-#install missing packages
-install(['streamlit', 'pandas', 'yfinance', 'matplotlib', 'sqlite3', 'urllib', 'subprocess', 'sys'])
 
 
 #change the style of the plot to dark mode (Hex colors used from ChatGPT, I don't like the default dark mode by matplotlib)
