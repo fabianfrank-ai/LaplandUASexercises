@@ -38,7 +38,7 @@ with st.sidebar:
         st.write('Feel free to explore and modify the code for your own projects!')
         st.write('DISCLAIMER: This app is for educational purposes only and should not be used for real trading decisions. Always do your own research and consult with a financial advisor before making investment decisions.')
   
-    with st.sidebar.expander('SMA? Bollinger Bands?,RSI?, MACD?, EMA?'):
+    with st.sidebar.expander('SMA? Bollinger Bands? RSI? MACD? EMA?'):
   
         st.write('Simple Moving Averages (SMA) smooth out price data to identify trends. The 30-day SMA reacts faster to price changes than the 100-day SMA.')
         st.write('Bollinger Bands consist of a middle band (SMA), an upper band, and a lower band. Prices near the upper band may indicate overbought conditions, while prices near the lower band may indicate oversold conditions.')
