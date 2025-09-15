@@ -1,5 +1,5 @@
 #User input for the desired amount of minutes
-minutes_input = input("Enter number of minutes: ")
+minutes_input = input("Enter number of minutes: \n")
 
 #try the script, if it fails(e.g. due to string in the input) return error message
 try:

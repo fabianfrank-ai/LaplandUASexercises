@@ -1,6 +1,6 @@
 #get the kilometers in urban and non urban areas from the user
-kilometers_non_urban = input('Enter kilometers in non-urban areas: ')
-kilometers_urban = input('Enter kilometers inside urban areas: ')
+kilometers_non_urban = input('Enter kilometers in non-urban areas: \n')
+kilometers_urban = input('Enter kilometers inside urban areas: \n')
 
 #try the code and check for invalid input
 try:

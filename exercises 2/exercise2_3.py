@@ -1,6 +1,6 @@
 #get the salary and tax percentage by the user
-salary = input("Your monthly salary")
-tax_percentage = input("Your tax percentage in %")
+salary = input("Your monthly salary\n")
+tax_percentage = input("Your tax percentage in %\n")
 
 try:
     #convert strings into floats if possible, if not go into except bracket

@@ -2,9 +2,9 @@ import numpy as np
 
 
 #get 3 sides via user input
-side_a = input("Give the first side")
-side_b = input("Give the second side")
-side_c = input("Give the third side")
+side_a = input("Give the first side\n")
+side_b = input("Give the second side\n")
+side_c = input("Give the third side\n")
 
 
 #try the code snippet, return error message when unknown numbers detected
@@ -28,7 +28,7 @@ except ValueError:
 
 
 #get the radius via user input
-radius=input("Give the radius")
+radius=input("Give the radius\n")
 
 #try this snippet also to check vor invalid values
 try:

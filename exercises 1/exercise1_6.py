@@ -1,5 +1,5 @@
 #get the amount of cents by user input
-cents = input("How many cents?(1-100)")
+cents = input("How many cents?(1-100)\n")
 
 #try the code and give message if unknown signs(non-numbers or floats were given)
 try :

@@ -1,5 +1,5 @@
 #ask the user what number he intends to use
-user_input_price = input("Please insert the price of the product in Euros")
+user_input_price = input("Please insert the price of the product in Euros\n")
 
 
 #check whether the user inserted a valid value

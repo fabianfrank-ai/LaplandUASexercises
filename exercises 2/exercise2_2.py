@@ -1,6 +1,6 @@
 #get the legs via user input
-first_leg = input("Give the first leg")
-second_leg = input("Give the second leg")
+first_leg = input("Give the first leg\n")
+second_leg = input("Give the second leg\n")
 
 
 #check, whether user input is valid

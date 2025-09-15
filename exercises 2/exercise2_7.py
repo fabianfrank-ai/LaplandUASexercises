@@ -4,9 +4,9 @@
 
 
 #get the 3 values a, b and c from the user
-a = input("Enter a value a")
-b = input("Enter a value b")
-c = input("Enter a value c")
+a = input("Enter a value a\n")
+b = input("Enter a value b\n")
+c = input("Enter a value c\n")
 
 #try the code first in case of accidental letters
 try:

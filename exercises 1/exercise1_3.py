@@ -1,5 +1,5 @@
 #User input for the length of a trip
-trip_length = input("Enter the length of trip in kilometers: ")
+trip_length = input("Enter the length of trip in kilometers: \n")
 
 #using try.....except in case user input is not a number
 try:
