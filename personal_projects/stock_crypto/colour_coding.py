@@ -128,6 +128,6 @@ def bollinger_color(val):
     elif val < 0.2:
         color = '#ff0000'  # red for weak position
     else:
-        color = '#ffff00'  # yellow for neutral
+        color = '#ffa700'  # yellow for neutral
 
     return 'background-color: {}'.format(color)
