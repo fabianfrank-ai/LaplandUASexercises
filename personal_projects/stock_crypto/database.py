@@ -1,8 +1,8 @@
 import sqlite3
 
-#plan was to initially use it, it kind of lost its purpose but might come in handy someday
+# plan was to initially use it, it kind of lost its purpose but might come in handy someday
 
-#create a new database (or connect to existing) and create a table###
+# create a new database (or connect to existing) and create a table###
 conn = sqlite3.connect('stock_data.db')
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS stocks
@@ -13,7 +13,7 @@ conn.commit()
 conn.close()
 
 
-#function to insert data into a database for all the data
+# function to insert data into a database for all the data
 def insert_stock_data(data):
     """insert data into the database"""
     
@@ -26,7 +26,7 @@ def insert_stock_data(data):
     conn.close()
 
 
-#function to insert all buy prices detected(if i opt to use it)
+# function to insert all buy prices detected(if i opt to use it)
 def insert_buy(date, ticker, data):
     """insert data into the database"""
 

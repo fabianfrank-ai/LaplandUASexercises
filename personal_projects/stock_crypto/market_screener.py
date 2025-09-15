@@ -1,4 +1,4 @@
-#this program will screen the maket to find eligible stocks to buy 
+# this program will screen the maket to find eligible stocks to buy 
 
 import pandas as pd
 import urllib.request
@@ -12,24 +12,25 @@ def market_screener():
    """Screen the market for potential buy opportunities in S&P 500 companies."""
 
    
-   #Get the list of S&P 500 companies from Wikipedia
+   # Get the list of S&P 500 companies from Wikipedia
    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
    html = urllib.request.urlopen(req).read()
    tables = pd.read_html(html)
 
 
-   #filter all the tickers from the table on wikipedia
+   # filter all the tickers from the table on wikipedia
    sp500_tickers = tables[0]['Symbol'].tolist()
 
 
-   #for every ticker in sp500
+   # for every ticker in sp500
    for ticker in sp500_tickers:
 
 
-      #try, in order to prevent false tickers in eg wikipedia or conversion errors
+      # try, in order to prevent false tickers in eg wikipedia or conversion errors
       try:
-         #fetch data, create smas, bollinger bands and rsi for every ticker
+
+         # fetch data, create smas, bollinger bands and rsi for every ticker
          data = fetch_stock_data(ticker, "5mo")
          sma_30 = sma(data, 30)
          sma_100 = sma(data, 100)
@@ -37,11 +38,11 @@ def market_screener():
          rsi_14 = rsi(data, 14)
 
 
-         #create a verdict for the ticker 
+         # create a verdict for the ticker 
          verdict = generate_verdict(data, sma_30, sma_100, lower_band, upper_band, rsi_14)
 
 
-         #save the tickers with a buy verdict 
+         # save the tickers with a buy verdict 
          if verdict == "Buy" :
             return ticker, verdict
          else:
@@ -58,20 +59,20 @@ def market_screener():
 
 
 
-#I'm sure there is a better way to do this, but for now it works, open to suggestions
+# I'm sure there is a better way to do this, but for now it works, open to suggestions
 
 def heatmap():
-   """Generate a heatmap of S&P 500 companies based on their gain/loss percentage over the last day."""
+   """Generate a Dataframe of S&P 500 companies based on their gain/loss percentage over the last day."""
 
 
-   #Get the list of S&P 500 companies from Wikipedia
+   # Get the list of S&P 500 companies from Wikipedia
    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
    html = urllib.request.urlopen(req).read()
    tables = pd.read_html(html)
    
 
-   #create empty lists to store the data, lists are then used to create a dataframe at the end
+   # create empty lists to store the data, lists are then used to create a dataframe at the end
    ticker_data = []
    change_data = []
    verdict=[]
@@ -82,36 +83,36 @@ def heatmap():
    macd_data = []
 
 
-   #filter all the tickers from the table on wikipedia
+   # filter all the tickers from the table on wikipedia
    sp500_tickers = tables[0]['Symbol'].tolist()
 
 
-   #for every ticker in sp500
+   # for every ticker in sp500
    for ticker in sp500_tickers:
       try:
          
-         #fetch data
+         # fetch data
          data = fetch_stock_data(ticker, "6mo")
 
          
-         #check if data is valid
+         # check if data is valid
          if data is None or len(data) < 2:
             print(f"Not enough data for {ticker}")
             continue
 
 
-         #calculate the percentage change from the previous close to the latest close
+         # calculate the percentage change from the previous close to the latest close
          latest_close = data['Close'].iloc[-1]
          previous_close = data['Close'].iloc[-2]
          latest_change = ((latest_close - previous_close) / previous_close) * 100
 
 
-         #append all the data to the respective lists
+         # append all the data to the respective lists
          ticker_data.append(ticker)
          change_data.append(latest_change)
 
 
-         #calculate indicators for the ticker and append the relevant data to the respective lists
+         # calculate indicators for the ticker and append the relevant data to the respective lists
          sma_data.append(sma(data,30).iloc[-1] - sma(data,100).iloc[-1])
          lower_band, upper_band = bollinger_bands(data,30)
          bollinger_data.append((data['Close'].iloc[-1] - lower_band.iloc[-1]) / (upper_band.iloc[-1] - lower_band.iloc[-1]))
@@ -121,11 +122,11 @@ def heatmap():
          macd_data.append(macd_line.iloc[-1] - signal_line.iloc[-1])
 
 
-         #generate and append the verdict for the ticker
+         # generate and append the verdict for the ticker
          verdict.append(generate_verdict(data, sma(data,30), sma(data,100), *bollinger_bands(data,30), rsi(data,14)))
  
 
-         #create a dataframe from the lists
+         # create a dataframe from the lists
          df=pd.DataFrame({
          'Ticker': ticker_data,
          'Change': change_data,
@@ -140,12 +141,12 @@ def heatmap():
 
    
       
-      #Print any errors and continue with the next ticker
+      # Print any errors and continue with the next ticker
       except Exception as e:
          print(f"Error processing {ticker}: {e}")
          continue
 
 
-#return the dataframe
+# return the dataframe
    return df
 

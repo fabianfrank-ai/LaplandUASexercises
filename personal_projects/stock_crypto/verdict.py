@@ -9,18 +9,20 @@ import pandas as pd
 from indicators import ema, macd
 
 def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
-    #at the beginning of the function, set the signals to 0, as there is no data yet
+    """Generate a trading verdict based on multiple technical indicators."""
+  
+    # at the beginning of the function, set the signals to 0, as there is no data yet
     buy_signals = 0
     sell_signals = 0
 
 
-    #SMA signal
-    #as market prices may vary, we will use the percantage difference between long and short SMA
+    # SMA signal
+    # as market prices may vary, we will use the percantage difference between long and short SMA
     sma_diff=(short_sma - long_sma) / long_sma * 100
 
 
 
-   #use 0.3 as threshold to decide whether the difference between sma differences is noteworthy enough
+   # use 0.3 as threshold to decide whether the difference between sma differences is noteworthy enough
     if sma_diff.iloc[-1] > 0.3: 
         buy_signals += 1
     elif sma_diff.iloc[-1] < -0.3:
@@ -30,7 +32,7 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
 
  
 
-    #Bollinger Bands signal
+    # Bollinger Bands signal
     if upper_band.iloc[-1] < data['Close'].iloc[-1]:  
         sell_signals += 1
     elif lower_band.iloc[-1] > data['Close'].iloc[-1]:  
@@ -40,7 +42,7 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     
 
 
-    #RSI signal
+    # RSI signal
     if rsi.iloc[-1] > 70:  
         sell_signals += 1
     elif rsi.iloc[-1] < 30:  
@@ -48,10 +50,12 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     else:
         pass  # No signal from RSI
 
-    #EMA signal
-    #Ema will not be seen in the graph as of now, but it is calculated here to be used in the verdict
+
+    # EMA signal
     ema_short=ema(data, 12)
     ema_long=ema(data, 26)
+
+
     if ema_short.iloc[-1] > ema_long.iloc[-1]:
         buy_signals += 1
     elif ema_short.iloc[-1] < ema_long.iloc[-1]:
@@ -60,8 +64,7 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
         pass  # No signal from EMA
 
 
-    #MACD signal
-    #MACD will not be seen in the graph as of now, but it is calculated here to be used in the verdict
+    # MACD signal
     macd_line, signal_line=macd(data)
     if macd_line.iloc[-1] > signal_line.iloc[-1]:
         buy_signals += 1
@@ -71,7 +74,7 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
         pass  # No signal from MACD
      
 
-    #return verdict
+    # return verdict
     if buy_signals >= 3 and buy_signals < 5:
         return "Buy"
     if buy_signals >=4:

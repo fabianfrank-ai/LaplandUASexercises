@@ -1,5 +1,6 @@
-#this is mainly used to colour code the dataframe in streamlit
-#Mostly the colours represent a traffic light(green, red, orange) depending on how good/bad a value is
+# this is mainly used to colour code the dataframe in streamlit
+# The different colors are used to highlight different levels of change, verdicts, and indicator values.
+# Those colors are for visual purposes but also commonly used in trading
 
 def color_code(val):
     """Color code the dataframe based on the percentage change."""
@@ -7,20 +8,34 @@ def color_code(val):
 
     # Define color thresholds, bigger changes get darker colors, to emphasize them
     if val > 0 and val <=1:
-        color = '#90ee90'  
-    elif val > 1 and val <=3:
-        color = '#32cd32' 
-    elif val > 3:
-        color = '#008000' 
-    elif val < 0 and val >= -1:
-        color = '#ffcccb'  
-    elif val < -1 and val >= -3:
-        color = '#ff6347' 
-    elif val < -3:
-        color = '#ff0000'  
-    else:
-        color = '#000000'  
 
+        color = '#90ee90'  
+
+    elif val > 1 and val <=3:
+
+        color = '#32cd32' 
+
+    elif val > 3:
+
+        color = '#008000' 
+
+    elif val < 0 and val >= -1:
+
+        color = '#ffcccb'  
+
+    elif val < -1 and val >= -3:
+
+        color = '#ff6347' 
+
+    elif val < -3:
+
+        color = '#ff0000'  
+
+    else:
+
+        color = '#000000' 
+
+    # return the color in this format so streamlit can use it
     return 'background-color: {}'.format(color) 
 
 
@@ -33,15 +48,25 @@ def verdict_color(val):
 
     # give every verdict a specific color for the heatmap
     if val == 'Buy':
+
         color = '#00ff00'  
+
     elif val == 'Strong Buy':
+
         color = '#008000'  
+
     elif val == 'Strong Sell':
+
         color = '#800000'  
+
     elif val == 'Hold':
+
         color = '#ffa700' 
+
     elif val == 'Sell':
+
         color = '#ff0000' 
+
     else:
         color = '#000000'  
     
@@ -57,10 +82,15 @@ def rsi_color(val):
 
 
     if val > 70:
+
         color = '#ff0000' 
+
     elif val < 30:
+
         color = '#00ff00' 
+
     else:
+
         color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
@@ -74,11 +104,16 @@ def ema_color(val):
 
 
     if val > 0:
+
         color = '#00ff00'  
+
     elif val < 0:
+
         color = '#ff0000' 
+
     else:
-        color = '#ffa700'  
+
+        color = "#616161"  
 
     return 'background-color: {}'.format(color)
 
@@ -91,10 +126,15 @@ def macd_color(val):
 
 
     if val > 0:
-        color = '#00ff00' 
+
+        color = "#0011ff" 
+
     elif val < 0:
-        color = '#ff0000' 
+
+        color = "#ff7300" 
+
     else:
+
         color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
@@ -108,10 +148,15 @@ def sma_color(val):
 
 
     if val > 0.3:
-        color = '#00ff00'  
+
+        color = "#0f4000" 
+
     elif val < -0.3:
-        color = '#ff0000'  
+
+        color = "#950000"  
+
     else:
+
         color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
@@ -125,10 +170,15 @@ def bollinger_color(val):
 
 
     if val > 0.8:
-        color = '#00ff00'  
+
+        color = "#ff9100"
+
     elif val < 0.2:
-        color = '#ff0000'  
+
+        color = "#8800ff"  
+
     else:
-        color = '#ffa700' 
+        
+        color = "#00f7ff" 
 
     return 'background-color: {}'.format(color)
