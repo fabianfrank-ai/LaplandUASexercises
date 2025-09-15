@@ -1,10 +1,10 @@
 #get the amount of cents by user input
-cents=input("How many cents?(1-100)")
+cents = input("How many cents?(1-100)")
 
 #try the code and give message if unknown signs(non-numbers or floats were given)
 try :
     #convert str into int
-    cents=int(cents)
+    cents = int(cents)
 
 
     #check if user input is below 100
