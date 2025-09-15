@@ -1,12 +1,12 @@
 #get the kilometers in urban and non urban areas from the user
-kilometers_non_urban=input('Enter kilometers in non-urban areas: ')
-kilometers_urban=input('Enter kilometers inside urban areas: ')
+kilometers_non_urban = input('Enter kilometers in non-urban areas: ')
+kilometers_urban = input('Enter kilometers inside urban areas: ')
 
 #try the code and check for invalid input
 try:
     #convert input strings into integers
-    kilometers_urban=int(kilometers_urban)
-    kilometers_non_urban=int(kilometers_non_urban)
+    kilometers_urban = int(kilometers_urban)
+    kilometers_non_urban = int(kilometers_non_urban)
 
     #calculate the fuel used in urban and outside urban area
     fuel_urban = kilometers_urban * (7.5 / 100)
