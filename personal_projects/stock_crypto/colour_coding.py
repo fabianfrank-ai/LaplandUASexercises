@@ -1,4 +1,5 @@
 #this is mainly used to colour code the dataframe in streamlit
+#Mostly the colours represent a traffic light(green, red, orange) depending on how good/bad a value is
 
 def color_code(val):
     """Color code the dataframe based on the percentage change."""
@@ -6,21 +7,21 @@ def color_code(val):
 
     # Define color thresholds, bigger changes get darker colors, to emphasize them
     if val > 0 and val <=1:
-        color = '#90ee90'  # lightgreen
+        color = '#90ee90'  
     elif val > 1 and val <=3:
-        color = '#32cd32'  # limegreen
+        color = '#32cd32' 
     elif val > 3:
-        color = '#008000'  # green
+        color = '#008000' 
     elif val < 0 and val >= -1:
-        color = '#ffcccb'  # lightcoral
+        color = '#ffcccb'  
     elif val < -1 and val >= -3:
-        color = '#ff6347'  # tomato
+        color = '#ff6347' 
     elif val < -3:
-        color = '#ff0000'  # red
+        color = '#ff0000'  
     else:
-        color = '#000000'  # black for no change or invalid data
+        color = '#000000'  
 
-    return 'background-color: {}'.format(color) # return the background color style as css string
+    return 'background-color: {}'.format(color) 
 
 
 
@@ -32,17 +33,17 @@ def verdict_color(val):
 
     # give every verdict a specific color for the heatmap
     if val == 'Buy':
-        color = '#00ff00'  # green
+        color = '#00ff00'  
     elif val == 'Strong Buy':
-        color = '#008000'  # dark green
+        color = '#008000'  
     elif val == 'Strong Sell':
-        color = '#800000'  # dark red
+        color = '#800000'  
     elif val == 'Hold':
-        color = '#ffa700'  # orange-ish
+        color = '#ffa700' 
     elif val == 'Sell':
-        color = '#ff0000'  # red
+        color = '#ff0000' 
     else:
-        color = '#000000'  # black for invalid data
+        color = '#000000'  
     
 
     return 'background-color: {}'.format(color)
@@ -56,11 +57,11 @@ def rsi_color(val):
 
 
     if val > 70:
-        color = '#ff0000'  # red for overbought
+        color = '#ff0000' 
     elif val < 30:
-        color = '#00ff00'  # green for oversold
+        color = '#00ff00' 
     else:
-        color = '#ffa700'  # orange for neutral
+        color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
 
@@ -73,11 +74,11 @@ def ema_color(val):
 
 
     if val > 0:
-        color = '#00ff00'  # green for bullish
+        color = '#00ff00'  
     elif val < 0:
-        color = '#ff0000'  # red for bearish
+        color = '#ff0000' 
     else:
-        color = '#ffa700'  # orange for neutral
+        color = '#ffa700'  
 
     return 'background-color: {}'.format(color)
 
@@ -90,11 +91,11 @@ def macd_color(val):
 
 
     if val > 0:
-        color = '#00ff00'  # green for bullish
+        color = '#00ff00' 
     elif val < 0:
-        color = '#ff0000'  # red for bearish
+        color = '#ff0000' 
     else:
-        color = '#ffa700'  # orange for neutral
+        color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
 
@@ -107,11 +108,11 @@ def sma_color(val):
 
 
     if val > 0.3:
-        color = '#00ff00'  # green for bullish
+        color = '#00ff00'  
     elif val < -0.3:
-        color = '#ff0000'  # red for bearish
+        color = '#ff0000'  
     else:
-        color = '#ffa700'  # orange for neutral
+        color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
 
@@ -124,10 +125,10 @@ def bollinger_color(val):
 
 
     if val > 0.8:
-        color = '#00ff00'  # green for strong position
+        color = '#00ff00'  
     elif val < 0.2:
-        color = '#ff0000'  # red for weak position
+        color = '#ff0000'  
     else:
-        color = '#ffa700'  # orange for neutral
+        color = '#ffa700' 
 
     return 'background-color: {}'.format(color)
