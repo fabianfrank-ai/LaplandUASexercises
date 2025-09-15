@@ -1,4 +1,3 @@
-import yfinance as yf  #suggested by chatgpt
 import streamlit as st
 import matplotlib.pyplot as plt
 from fetch_data import fetch_stock_data
