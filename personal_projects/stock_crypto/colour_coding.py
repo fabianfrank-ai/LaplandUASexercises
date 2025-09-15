@@ -111,7 +111,7 @@ def sma_color(val):
     elif val < -0.3:
         color = '#ff0000'  # red for bearish
     else:
-        color = '#ffff00'  # yellow for neutral
+        color = '#ffa700'  # orange for neutral
 
     return 'background-color: {}'.format(color)
 
@@ -128,6 +128,6 @@ def bollinger_color(val):
     elif val < 0.2:
         color = '#ff0000'  # red for weak position
     else:
-        color = '#ffa700'  # yellow for neutral
+        color = '#ffa700'  # orange for neutral
 
     return 'background-color: {}'.format(color)
