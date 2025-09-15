@@ -38,7 +38,7 @@ def verdict_color(val):
     elif val == 'Strong Sell':
         color = '#800000'  # dark red
     elif val == 'Hold':
-        color = '#ffff00'  # yellow
+        color = '#FF5C00'  # yellow
     elif val == 'Sell':
         color = '#ff0000'  # red
     else:
