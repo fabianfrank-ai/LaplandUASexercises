@@ -10,8 +10,8 @@ from indicators import ema, macd
 
 def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     #at the beginning of the function, set the signals to 0, as there is no data yet
-    buy_signals=0
-    sell_signals=0
+    buy_signals = 0
+    sell_signals = 0
 
 
     #SMA signal
@@ -26,30 +26,29 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     elif sma_diff.iloc[-1] < -0.3:
         sell_signals += 1
     else:
-        pass  # No signal from SMA
+        pass 
 
  
 
-    #Bollinger Bands signal
-    if upper_band.iloc[-1] < data['Close'].iloc[-1]:  # Price above upper band
+    #Bollinger Bands signal -> Buy signal if market price is below lower band
+    if upper_band.iloc[-1] < data['Close'].iloc[-1]:  
         sell_signals += 1
-    elif lower_band.iloc[-1] > data['Close'].iloc[-1]:  # Price below lower band
+    elif lower_band.iloc[-1] > data['Close'].iloc[-1]: 
         buy_signals += 1
     else:
-        pass  # No signal from Bollinger Bands
+        pass  
     
 
 
-    #RSI signal
-    if rsi.iloc[-1] > 70:  # Overbought
+    #RSI signal -> If >70 it's a strong sign of overbought stocks
+    if rsi.iloc[-1] > 70: 
         sell_signals += 1
-    elif rsi.iloc[-1] < 30:  # Oversold
+    elif rsi.iloc[-1] < 30:
         buy_signals += 1
     else:
-        pass  # No signal from RSI
+        pass  
 
-    #EMA signal
-    #Ema will not be seen in the graph as of now, but it is calculated here to be used in the verdict
+    #EMA signal -> good sign if the short is 
     ema_short=ema(data, 12)
     ema_long=ema(data, 26)
     if ema_short.iloc[-1] > ema_long.iloc[-1]:
@@ -57,28 +56,27 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     elif ema_short.iloc[-1] < ema_long.iloc[-1]:
         sell_signals += 1
     else:
-        pass  # No signal from EMA
+        pass  
 
 
-    #MACD signal
-    #MACD will not be seen in the graph as of now, but it is calculated here to be used in the verdict
+    #MACD signal -> good sign if the macd line is above the signal line
     macd_line, signal_line=macd(data)
     if macd_line.iloc[-1] > signal_line.iloc[-1]:
         buy_signals += 1
     elif macd_line.iloc[-1] < signal_line.iloc[-1]:
         sell_signals += 1
     else:
-        pass  # No signal from MACD
+        pass 
      
 
     #return verdict
-    if buy_signals >=3 and buy_signals <5:
+    if buy_signals >= 3 and buy_signals < 5:
         return "Buy"
-    if buy_signals==5:
+    if buy_signals >= 4:
         return "Strong Buy"
-    elif sell_signals >=3 and sell_signals <5:
+    elif sell_signals >= 3 and sell_signals < 5:
         return "Sell"
-    elif sell_signals==5:
+    elif sell_signals >= 4:
         return "Strong Sell"
     else:
         return "Hold"
