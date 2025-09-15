@@ -38,7 +38,7 @@ def verdict_color(val):
     elif val == 'Strong Sell':
         color = '#800000'  # dark red
     elif val == 'Hold':
-        color = '#FF5C00'  # yellow
+        color = '#ffa700'  # orange-ish
     elif val == 'Sell':
         color = '#ff0000'  # red
     else:
@@ -60,7 +60,7 @@ def rsi_color(val):
     elif val < 30:
         color = '#00ff00'  # green for oversold
     else:
-        color = '#ffff00'  # yellow for neutral
+        color = '#ffa700'  # orange for neutral
 
     return 'background-color: {}'.format(color)
 
@@ -77,7 +77,7 @@ def ema_color(val):
     elif val < 0:
         color = '#ff0000'  # red for bearish
     else:
-        color = '#ffff00'  # yellow for neutral
+        color = '#ffa700'  # orange for neutral
 
     return 'background-color: {}'.format(color)
 
@@ -94,7 +94,7 @@ def macd_color(val):
     elif val < 0:
         color = '#ff0000'  # red for bearish
     else:
-        color = '#ffff00'  # yellow for neutral
+        color = '#ffa700'  # orange for neutral
 
     return 'background-color: {}'.format(color)
 
