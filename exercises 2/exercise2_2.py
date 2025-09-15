@@ -10,7 +10,7 @@ try:
     second_leg = float(second_leg)
 
     #calculate hypotenuse with (a**2+b**2)**0.5,  could be replaced by math.sqrt or np.sqrt
-    hypotenuse = ((first_leg**2) + (second_leg**2))**0.5
+    hypotenuse = ((first_leg ** 2) + (second_leg ** 2)) ** 0.5
 
     #round the hypotenuse
     hypotenuse = round(hypotenuse,2)

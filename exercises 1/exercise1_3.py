@@ -7,7 +7,7 @@ try:
    trip_length = int(trip_length)
 
    #calculate the consumed fuel with given values of 6,5l/100km
-   consumed_fuel = trip_length*(6.5/100)
+   consumed_fuel = trip_length * (6.5 / 100)
 
    #round the consumed fuel up to one decimal
    rounded_fuel = round(consumed_fuel,1)

@@ -25,13 +25,13 @@ try:
 
     #else if the discriminant is equal to 0 there is only one solution, as adding and subtracting 0 makes no difference
     elif root == 0:
-        x1 = (-b-(root**0.5))/2*a
+        x1 = (- b - (root ** 0.5)) / 2 * a
         print(f'Only one Solution has been found: {x1}')
 
     #if the discriminant is bigger than 0 there are 2 solutions, which are calculated below
     else:
-        x1 = (-b-(root**0.5))/2*a
-        x2 = (-b+(root**0.5))/2*a
+        x1 = ( - b - ( root ** 0.5)) / 2 * a
+        x2 = ( - b + ( root ** 0.5)) / 2 * a
         print(f'Solution 1: {x1}')
         print(f'Solution 2: {x2}')
 

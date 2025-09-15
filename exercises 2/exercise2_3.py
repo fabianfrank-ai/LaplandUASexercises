@@ -8,11 +8,11 @@ try:
     tax_percentage = float(tax_percentage)
 
     #calculate and round the tax percentage in %
-    taxes = salary*tax_percentage/100
+    taxes = salary * tax_percentage / 100
     taxes = round(taxes,2)
 
     #deduct the taxes from the salary and round it
-    earnings = salary-taxes
+    earnings = salary - taxes
     earnings = round(earnings,2)
 
     #print it out to the user
