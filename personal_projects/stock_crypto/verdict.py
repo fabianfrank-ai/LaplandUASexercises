@@ -1,7 +1,7 @@
 #Verdict.py tries to use the sma, bollinger bands,ema and macd and rsi in order to create a verdict how the user should trade
 #The verdict is based on the following rules:
-#Out of the 3 indicators, if 2 or more indicate buy/sell, the verdict is buy/sell
-#If only 1 indicator indicates buy/sell, the verdict is hold
+#Out of the 5 indicators, if 3 or more indicate buy/sell, the verdict is buy/sell
+#If only 1,2 indicator indicates buy/sell, the verdict is hold
 #If none of the indicators indicate buy/sell, the verdict is hold
 #Note: This is a very simple approach and should not be used for real trading decisions. It is just for educational purposes.
 
@@ -26,29 +26,30 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     elif sma_diff.iloc[-1] < -0.3:
         sell_signals += 1
     else:
-        pass 
+        pass  # No signal from SMA
 
  
 
-    #Bollinger Bands signal -> Buy signal if market price is below lower band
+    #Bollinger Bands signal
     if upper_band.iloc[-1] < data['Close'].iloc[-1]:  
         sell_signals += 1
-    elif lower_band.iloc[-1] > data['Close'].iloc[-1]: 
+    elif lower_band.iloc[-1] > data['Close'].iloc[-1]:  
         buy_signals += 1
     else:
-        pass  
+        pass  # No signal from Bollinger Bands
     
 
 
-    #RSI signal -> If >70 it's a strong sign of overbought stocks
-    if rsi.iloc[-1] > 70: 
+    #RSI signal
+    if rsi.iloc[-1] > 70:  
         sell_signals += 1
-    elif rsi.iloc[-1] < 30:
+    elif rsi.iloc[-1] < 30:  
         buy_signals += 1
     else:
-        pass  
+        pass  # No signal from RSI
 
-    #EMA signal -> good sign if the short is 
+    #EMA signal
+    #Ema will not be seen in the graph as of now, but it is calculated here to be used in the verdict
     ema_short=ema(data, 12)
     ema_long=ema(data, 26)
     if ema_short.iloc[-1] > ema_long.iloc[-1]:
@@ -56,25 +57,26 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
     elif ema_short.iloc[-1] < ema_long.iloc[-1]:
         sell_signals += 1
     else:
-        pass  
+        pass  # No signal from EMA
 
 
-    #MACD signal -> good sign if the macd line is above the signal line
+    #MACD signal
+    #MACD will not be seen in the graph as of now, but it is calculated here to be used in the verdict
     macd_line, signal_line=macd(data)
     if macd_line.iloc[-1] > signal_line.iloc[-1]:
         buy_signals += 1
     elif macd_line.iloc[-1] < signal_line.iloc[-1]:
         sell_signals += 1
     else:
-        pass 
+        pass  # No signal from MACD
      
 
     #return verdict
     if buy_signals >= 3 and buy_signals < 5:
         return "Buy"
-    if buy_signals >= 4:
+    if buy_signals >=4:
         return "Strong Buy"
-    elif sell_signals >= 3 and sell_signals < 5:
+    elif sell_signals >=3 and sell_signals < 5:
         return "Sell"
     elif sell_signals >= 4:
         return "Strong Sell"
