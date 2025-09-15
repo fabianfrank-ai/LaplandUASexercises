@@ -196,13 +196,13 @@ ax2.legend()
 
 
 #Give the user feedback whether to buy,sell or hold a product
-if verdict=="Buy":
+if verdict == "Buy":
     st.success(f'Verdict: {verdict}. According to the indicators, it might be a good time to buy {stock}. Look at the sidebar for an explanation!')
-elif verdict=="Strong Buy":
+elif verdict == "Strong Buy":
     st.success(f'Verdict: {verdict}. According to the indicators, it might be a very good time to buy {stock}. Look at the sidebar for an explanation!')
-elif verdict=="Strong Sell":
+elif verdict == "Strong Sell":
     st.error(f'Verdict: {verdict}. According to the indicators, it might be a very good time to sell {stock}.')
-elif verdict=="Sell":
+elif verdict == "Sell":
     st.error(f'Verdict: {verdict}. According to the indicators, it might be a good time to sell {stock}.')
 else:
     st.warning(f'Verdict: {verdict}. According to the indicators, it might be best to hold {stock} for now.')
