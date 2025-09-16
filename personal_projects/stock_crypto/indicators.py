@@ -2,8 +2,7 @@
 import pandas as pd
 
 sma=pd.DataFrame()
-crossings=[]
-
+crossings_data=[]
 
 
 def sma(data, window):
@@ -19,21 +18,30 @@ def sma(data, window):
     return sma
    
 
-def moving_average_crossover(data,short_window,long_window):
+def moving_average_crossover(data,short_ma,long_ma):
     """Calculate Moving Average Crossover Signals"""
-    
+
+    # empty DataFrame to store crossover signals
+    crossings=pd.DataFrame()
+    crossings_data=[]
+
     # A golden cross occurs when a short-term moving average crosses above a long-term moving average, indicating a potential bullish trend.
-    short_sma = sma(data, short_window)
-    long_sma = sma(data, long_window)
+    for i in range(1, len(data)):
+        if i < len(data) - 1 :
 
-    for i in range(1,len(data)):
+            if short_ma.iloc[i+1] > long_ma.iloc[i+1] and short_ma.iloc[i-1] <= long_ma.iloc[i-1]:
+                crossings_data.append((data.index[i],'Golden Cross'))  
 
-        if short_sma.iloc[i] > long_sma.iloc[i] and short_sma.iloc[i-1] <= long_sma.iloc[i-1]:
-            crossings.append((data.index[i],'golden_cross'))
+            elif short_ma.iloc[i+1] < long_ma.iloc[i+1] and short_ma.iloc[i-1] >= long_ma.iloc[i-1]:
+                crossings_data.append((data.index[i],'Death Cross'))
 
-        elif short_sma.iloc[i] < long_sma.iloc[i] and short_sma.iloc[i-1] >= long_sma.iloc[i-1]:
-            crossings.append((data.index[i],'death_cross'))
-    return crossings
+            else:
+                continue
+
+    if crossings_data:
+        crossings = pd.DataFrame(crossings_data, columns=['Date', 'Crossover Type']).set_index('Date')
+
+    return crossings['Crossover Type']
 
     
 
@@ -107,6 +115,26 @@ def macd(data, short_window=12, long_window=26, signal_window=9):
     macd_line = ema_short - ema_long
     signal_line = macd_line.ewm(span=signal_window, adjust=False).mean()
     return macd_line, signal_line
+
+
+
+def atr(data, window=14):
+    """Average true range"""
+
+    # Average true range is an indicator for market volatility and therefore risk
+
+    true_ranges = pd.DataFrame()
+    true_ranges['H-L'] = data['High'] - data['Low']
+    true_ranges['H-PC'] = abs(data['High'] - data['Close'].shift(1))
+    true_ranges['L-PC'] = abs(data['Low'] - data['Close'].shift(1))
+    true_range = true_ranges.max(axis=1)
+
+    atr = true_range.rolling(window=window).mean()
+
+    # scale atr to be between 0 and 100
+    atr_scaled = (atr / atr.max())  * 100
+    
+    return atr_scaled.iloc[-1]
 
 
 # Further indicators can be added here in the future

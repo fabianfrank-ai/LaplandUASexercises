@@ -3,9 +3,8 @@
 import pandas as pd
 import urllib.request
 from fetch_data import fetch_stock_data
-from indicators import sma, bollinger_bands, rsi, ema, macd
+from indicators import sma, bollinger_bands, rsi, ema, macd , atr
 from verdict import generate_verdict
-from database import insert_buy
 
 
 def market_screener():
@@ -43,7 +42,7 @@ def market_screener():
 
 
          # save the tickers with a buy verdict 
-         if verdict == "Buy" :
+         if verdict == "Strong Buy" :
             return ticker, verdict
          else:
             pass  # No action for "Sell" or "Hold"
@@ -81,6 +80,7 @@ def heatmap():
    rsi_data = []
    ema_data = []
    macd_data = []
+   atr_data = []
 
 
    # filter all the tickers from the table on wikipedia
@@ -111,20 +111,32 @@ def heatmap():
          ticker_data.append(ticker)
          change_data.append(latest_change)
 
+         ema_percentage=(ema(data,12).iloc[-1] - ema(data,26).iloc[-1]) / ema(data,26).iloc[-1] * 100
+         sma_percentage=(sma(data,30).iloc[-1] - sma(data,100).iloc[-1]) / sma(data,100).iloc[-1] * 100
+
+         macd_line, signal_line = macd(data)
+         macd_difference= macd_line.iloc[-1] - signal_line.iloc[-1]
+
+
 
          # calculate indicators for the ticker and append the relevant data to the respective lists
-         sma_data.append(sma(data,30).iloc[-1] - sma(data,100).iloc[-1])
+         sma_data.append(sma_percentage)
          lower_band, upper_band = bollinger_bands(data,30)
-         bollinger_data.append((data['Close'].iloc[-1] - lower_band.iloc[-1]) / (upper_band.iloc[-1] - lower_band.iloc[-1]))
+         bollinger_percentage=(data['Close'].iloc[-1] - lower_band.iloc[-1]) / (upper_band.iloc[-1] - lower_band.iloc[-1])
+
+         bollinger_data.append(bollinger_percentage)
          rsi_data.append(rsi(data,14).iloc[-1])
-         ema_data.append(ema(data,12).iloc[-1] - ema(data,26).iloc[-1])
+         ema_data.append(ema_percentage)
          macd_line, signal_line = macd(data)
-         macd_data.append(macd_line.iloc[-1] - signal_line.iloc[-1])
+         macd_data.append(macd_difference)
 
 
          # generate and append the verdict for the ticker
          verdict.append(generate_verdict(data, sma(data,30), sma(data,100), *bollinger_bands(data,30), rsi(data,14)))
- 
+
+
+         atr_data.append(atr(data))
+
 
          # create a dataframe from the lists
          df=pd.DataFrame({
@@ -135,7 +147,8 @@ def heatmap():
          'RSI': rsi_data,
          'EMA Diff': ema_data,
          'MACD Diff': macd_data,
-         'Verdict': verdict
+         'Verdict': verdict,
+         'Risk': atr_data
           })
         
 
