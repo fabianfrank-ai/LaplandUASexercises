@@ -29,10 +29,10 @@ def moving_average_crossover(data,short_window,long_window):
     for i in range(1,len(data)):
 
         if short_sma.iloc[i] > long_sma.iloc[i] and short_sma.iloc[i-1] <= long_sma.iloc[i-1]:
-            crossings.append((data.index[i],'golden_cross'))
+            crossings.append((data.index[i], data.iloc[i], 'golden_cross'))
 
         elif short_sma.iloc[i] < long_sma.iloc[i] and short_sma.iloc[i-1] >= long_sma.iloc[i-1]:
-            crossings.append((data.index[i],'death_cross'))
+            crossings.append((data.index[i], data.iloc[i] ,'death_cross'))
     return crossings
 
     
