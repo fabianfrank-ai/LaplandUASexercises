@@ -150,7 +150,7 @@ rsi = rsi(data, 14)
 # create a verdict for the data(buy/hold/sell)
 verdict = generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
 
-moving_average_cross, cross_type = zip (moving_average_crossover(data, 30, 100))
+moving_average_cross, cross_type = zip (*moving_average_crossover(data, 30, 100))
 
 # calculate the price change percentage over the selected period
 price_change = price_change(data)
