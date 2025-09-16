@@ -191,8 +191,8 @@ if 'SMA' in selected_indicators:
     ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot')
     ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot')
 
-    ax.scatter(moving_average_cross, data_sma_100 , marker='^', color='limegreen', s=200, label='Golden Cross', zorder=5, alpha=[0.7 if ct=='Golden Cross' else 0 for ct in cross_type])
-    ax.scatter(moving_average_cross, data_sma100,  marker='v', color='red', s=200, label='Death Cross', zorder=5, alpha=[0.7 if ct=='Death Cross' else 0 for ct in cross_type])
+    ax.scatter(moving_average_index, moving_average_data, marker='^', color='limegreen', s=200, label='Golden Cross', zorder=5, alpha=[0.7 if ct=='Golden Cross' else 0 for ct in cross_type])
+    ax.scatter(moving_average_index, moving_average_data,  marker='v', color='red', s=200, label='Death Cross', zorder=5, alpha=[0.7 if ct=='Death Cross' else 0 for ct in cross_type])
 
 
 if 'Bollinger Bands' in selected_indicators:
