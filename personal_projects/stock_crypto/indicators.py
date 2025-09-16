@@ -19,6 +19,23 @@ def sma(data, window):
     return sma
    
 
+def moving_average_crossover(data,short_window,long_window):
+    """Calculate Moving Average Crossover Signals"""
+    
+    # A golden cross occurs when a short-term moving average crosses above a long-term moving average, indicating a potential bullish trend.
+    short_sma = sma(data, short_window)
+    long_sma = sma(data, long_window)
+
+    for i in range(1,len(data)):
+
+        if short_sma.iloc[i] > long_sma.iloc[i] and short_sma.iloc[i-1] <= long_sma.iloc[i-1]:
+            crossings.append((data.index[i],'golden_cross'))
+
+        elif short_sma.iloc[i] < long_sma.iloc[i] and short_sma.iloc[i-1] >= long_sma.iloc[i-1]:
+            crossings.append((data.index[i],'death_cross'))
+    return crossings
+
+    
 
 def bollinger_bands(data,window):
     """Calculate Bollinger Bands"""

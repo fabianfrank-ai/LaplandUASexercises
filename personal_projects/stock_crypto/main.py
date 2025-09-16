@@ -1,7 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from fetch_data import fetch_stock_data
-from indicators import sma,  bollinger_bands, rsi, price_change, ema, macd
+from indicators import sma,  bollinger_bands, rsi, price_change, ema, macd , moving_average_crossover
 from verdict import generate_verdict
 from market_screener import market_screener, heatmap
 from colour_coding import color_code, verdict_color, rsi_color, ema_color, macd_color, sma_color, bollinger_color
@@ -150,7 +150,7 @@ rsi = rsi(data, 14)
 # create a verdict for the data(buy/hold/sell)
 verdict = generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
 
-
+moving_average_cross, cross_type = zip (moving_average_crossover(data, 30, 100))
 
 # calculate the price change percentage over the selected period
 price_change = price_change(data)
@@ -190,6 +190,10 @@ if 'SMA' in selected_indicators:
 
     ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot')
     ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot')
+
+    ax.scatter(data.index, moving_average_cross, marker='^', color='limegreen', s=200, label='Golden Cross', zorder=5, alpha=[0.7 if ct=='Golden Cross' else 0 for ct in cross_type])
+    ax.scatter(data.index, moving_average_cross, marker='v', color='red', s=200, label='Death Cross', zorder=5, alpha=[0.7 if ct=='Death Cross' else 0 for ct in cross_type])
+
 
 if 'Bollinger Bands' in selected_indicators:
 
