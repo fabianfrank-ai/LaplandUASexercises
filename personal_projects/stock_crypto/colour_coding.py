@@ -182,3 +182,27 @@ def bollinger_color(val):
         color = "#00f7ff" 
 
     return 'background-color: {}'.format(color)
+
+
+
+def atr_color(val):
+    """Color code the ATR values."""
+
+
+    if val > 70:
+
+        color = "#850000"  
+
+    elif val < 70 and val >= 40:
+
+        color = "#ff0000"  
+
+    elif val < 40 and val >= 20:
+
+        color = "#ffa600" 
+    
+    else:
+
+        color = "#00ff00"
+
+    return 'background-color: {}'.format(color)

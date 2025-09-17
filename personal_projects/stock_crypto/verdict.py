@@ -22,66 +22,100 @@ def generate_verdict(data,short_sma,long_sma,lower_band,upper_band,rsi):
 
 
 
-   # use 0.3 as threshold to decide whether the difference between sma differences is noteworthy enough
-    if sma_diff.iloc[-1] > 0.3: 
+   # use 2 as threshold to decide whether the difference between sma differences is noteworthy enough
+   # NEW : stronger signals for bigger differences - for ALL indicators
+
+    if sma_diff.iloc[-1] > 2 and sma_diff.iloc[-1] < 8: 
         buy_signals += 1
-    elif sma_diff.iloc[-1] < -0.3:
+    elif sma_diff.iloc[-1] < -2:
         sell_signals += 1
+    elif sma_diff.iloc[-1] >= 10 :
+        buy_signals += 3
+    elif sma_diff.iloc[-1] <= -10 :
+        sell_signals += 3
+
     else:
         pass  # No signal from SMA
 
  
 
     # Bollinger Bands signal
-    if upper_band.iloc[-1] < data['Close'].iloc[-1]:  
+    bollinger_percentage=(data['Close'].iloc[-1] - lower_band.iloc[-1]) / (upper_band.iloc[-1] - lower_band.iloc[-1])
+
+    if bollinger_percentage < 0.2 and bollinger_percentage > 0:
+        sell_signals += 3
+    elif bollinger_percentage >= 0.2 and bollinger_percentage <= 0.4:
         sell_signals += 1
-    elif lower_band.iloc[-1] > data['Close'].iloc[-1]:  
+    elif bollinger_percentage >= 0.4 and bollinger_percentage <= 0.6 :
         buy_signals += 1
-    else:
-        pass  # No signal from Bollinger Bands
-    
+    elif bollinger_percentage > 0.8:
+        buy_signals += 3
+
 
 
     # RSI signal
-    if rsi.iloc[-1] > 70:  
+    if rsi.iloc[-1] > 80:  
+        sell_signals += 3
+    elif rsi.iloc[-1] > 60 and rsi.iloc[-1] <= 80:
         sell_signals += 1
-    elif rsi.iloc[-1] < 30:  
+    elif rsi.iloc[-1] >= 20 and rsi.iloc[-1] <= 40:
         buy_signals += 1
+    elif rsi.iloc[-1] < 20:  
+        buy_signals += 3
     else:
-        pass  # No signal from RSI
+        pass  
+    # No signal from RSI
+
+
 
 
     # EMA signal
     ema_short=ema(data, 12)
     ema_long=ema(data, 26)
 
+    ema_percentage=(ema_short - ema_long) / ema_long * 100
 
-    if ema_short.iloc[-1] > ema_long.iloc[-1]:
+    if ema_percentage.iloc[-1] > 2 and ema_percentage.iloc[-1] < 8:
         buy_signals += 1
-    elif ema_short.iloc[-1] < ema_long.iloc[-1]:
+    elif ema_percentage.iloc[-1] < -2:
         sell_signals += 1
+    elif ema_percentage.iloc[-1] >= 10 :
+        buy_signals += 3
+    elif ema_percentage.iloc[-1] <= -10 :
+        sell_signals += 3
     else:
-        pass  # No signal from EMA
+        pass
+     # No signal from EMA
 
 
     # MACD signal
     macd_line, signal_line=macd(data)
-    if macd_line.iloc[-1] > signal_line.iloc[-1]:
+
+    macd_difference= macd_line - signal_line
+    macd_scale= (macd_difference / signal_line) * 100
+
+    if macd_scale.iloc[-1] > 2 and macd_scale.iloc[-1] < 8:
         buy_signals += 1
-    elif macd_line.iloc[-1] < signal_line.iloc[-1]:
+    elif macd_scale.iloc[-1] < -2:
         sell_signals += 1
+    elif macd_scale.iloc[-1] >= 10 :
+        buy_signals += 3
+    elif macd_scale.iloc[-1] <= -10 :
+        sell_signals += 3
     else:
-        pass  # No signal from MACD
+        pass
+     
+    # No signal from MACD
      
 
     # return verdict
-    if buy_signals >= 3 and buy_signals < 5:
+    if buy_signals >= 4 and buy_signals < 8:
         return "Buy"
-    if buy_signals >=4:
+    if buy_signals >=9:
         return "Strong Buy"
-    elif sell_signals >=3 and sell_signals < 5:
+    elif sell_signals >=4 and sell_signals < 8:
         return "Sell"
-    elif sell_signals >= 4:
+    elif sell_signals >= 9:
         return "Strong Sell"
     else:
         return "Hold"

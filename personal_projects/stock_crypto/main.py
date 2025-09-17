@@ -1,10 +1,10 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from fetch_data import fetch_stock_data
-from indicators import sma,  bollinger_bands, rsi, price_change, ema, macd
+from indicators import sma,  bollinger_bands, rsi, price_change, ema, macd , moving_average_crossover, atr
 from verdict import generate_verdict
 from market_screener import market_screener, heatmap
-from colour_coding import color_code, verdict_color, rsi_color, ema_color, macd_color, sma_color, bollinger_color
+from colour_coding import color_code, verdict_color, rsi_color, ema_color, macd_color, sma_color, bollinger_color, atr_color
 
 
 
@@ -38,7 +38,7 @@ with st.sidebar:
         st.write('Feel free to explore and modify the code for your own projects!')
         st.write('DISCLAIMER: This app is for educational purposes only and should not be used for real trading decisions. Always do your own research and consult with a financial advisor before making investment decisions.')
   
-    with st.sidebar.expander('SMA? Bollinger Bands?,RSI?, MACD?, EMA?'):
+    with st.sidebar.expander('SMA? Bollinger Bands? RSI? MACD? EMA?'):
   
         st.write('Simple Moving Averages (SMA) smooth out price data to identify trends. The 30-day SMA reacts faster to price changes than the 100-day SMA.')
         st.write('Bollinger Bands consist of a middle band (SMA), an upper band, and a lower band. Prices near the upper band may indicate overbought conditions, while prices near the lower band may indicate oversold conditions.')
@@ -52,6 +52,10 @@ with st.sidebar:
         st.write('1. Select the stock ticker symbol (e.g., AMZN, MSFT, META) in the input box.')
         st.write('2. Use the slider to choose the period (in years) for which you want to fetch historical data. Note: indicatiors like SMA and Bollinger Bands are more visiblie with smaller periods')
         st.write('3. The app will display the stock price along with the 30-day and 100-day SMAs and Bollinger Bands on the chart.')
+        st.write('4. You can select additional technical indicators to display on the chart from the sidebar.')
+        st.write('5. The verdict (Buy, Hold, Sell) is generated based on multiple technical indicators and displayed above the chart.')
+        st.write('6. You can also run the Signal Searcher to scan the S&P 500 for potential buy opportunities.')
+        st.write('7. Click the "Show S&P 500 Heatmap" button to generate a heatmap of S&P 500 companies based on their daily gain/loss percentage.')
    
     with st.sidebar.expander('What are Stock Tickers and where can I find them ?'):
      
@@ -59,20 +63,17 @@ with st.sidebar:
   
     with st.sidebar.expander('How does the verdict work?'):
       
-        st.write('The verdict is generated based on five technical indicators: Simple Moving Averages (SMA), Bollinger Bands,Exponential Moving Average(EMA), Moving Average Convergance Divergence and Relative Strength Index (RSI).')
-        st.write('The rules for generating the verdict are as follows:')
-        st.write('- If 3 or more indicators suggest a "Buy" signal, the verdict is "Buy".')
-        st.write('- If 3 or more indicators suggest a "Sell" signal, the verdict is "Sell".')
-        st.write('- If only 1 or 2 indicators suggests a "Buy" or "Sell" signal, the verdict is "Hold".')
-        st.write('- If none of the indicators suggest a "Buy" or "Sell" signal, the verdict is "Hold".')
-        st.write('Note: This is a simplified approach for educational purposes and should not be used for real trading decisions.')
-  
+        st.write('The new verdict system still uses the five main indicators: SMA, Bollinger Bands, RSI, EMA and MACD.')
+        st.write('However, the strength of the signals has been increased. Now, if an indicator shows a very strong buy/sell signal (e.g., RSI > 80 or < 20), it counts as 3 buy/sell signals instead of just 1. This way, the verdict is more responsive to significant market movements.')
+        st.write('If 9 or more buy/sell signals are generated, the verdict will be "Strong Buy" or "Strong Sell". If 3-8 buy/sell signals are generated, the verdict will be "Buy" or "Sell". If only 1-2 buy/sell signals are generated, the verdict will be "Hold". If no buy/sell signals are generated, the verdict will also be "Hold".')
     with st.sidebar.expander('Signal Searcher'):
        
         st.write('The Signal Searcher is a tool that scans the S&P 500 companies to identify potential buy opportunities based on technical indicators. It fetches data for each company, calculates indicators like SMA, Bollinger Bands, and RSI, and generates a verdict (Buy, Sell, Hold) for each stock.')
         st.write('If a stock receives a "Buy" verdict from the indicators, it is highlighted as a potential buy opportunity. This tool helps users discover stocks that may be worth further research and consideration for investment.')
         st.write('Note: The Signal Searcher is for educational purposes only and should not be used for real trading decisions. Always conduct your own research and consult with a financial advisor before making investment decisions.')
+       
         if st.button('Run Signal Searcher', help='Click to scan the S&P 500 for potential buy opportunities'):
+
             result = market_screener()
             if result:
                 ticker, verdict = result
@@ -150,10 +151,20 @@ rsi = rsi(data, 14)
 # create a verdict for the data(buy/hold/sell)
 verdict = generate_verdict(data, data_sma_30, data_sma_100, lower_band, upper_band, rsi)
 
+crossover_type_sma = moving_average_crossover(data, data_sma_30, data_sma_100)
+crossover_data_sma = crossover_type_sma.index 
 
+crossover_type_ema = moving_average_crossover(data, ema_12, ema_26)
+crossover_data_ema = crossover_type_ema.index
 
 # calculate the price change percentage over the selected period
 price_change = price_change(data)
+
+
+atr = atr(data)
+
+
+
 
 if st.button('Show S&P 500 Heatmap', help='Click to generate a heatmap of S&P 500 companies based on their gain/loss percentage over the last day'):
    
@@ -161,13 +172,17 @@ if st.button('Show S&P 500 Heatmap', help='Click to generate a heatmap of S&P 50
         heatmap_data = heatmap()
     st.write('S&P 500 Daily Change Percentage:')
     st.dataframe(heatmap_data.style
-                 .applymap(color_code, subset=['Change'])
-                 .applymap(verdict_color, subset=['Verdict'])
-                 .applymap(sma_color, subset=['SMA Diff'])
-                 .applymap(rsi_color, subset=['RSI'])
-                 .applymap(bollinger_color, subset=['Bollinger %'])
-                 .applymap(ema_color, subset=['EMA Diff'])
-                 .applymap(macd_color, subset=['MACD Diff']))
+                 .map(color_code, subset=['Change'])
+                 .map(verdict_color, subset=['Verdict'])
+                 .map(sma_color, subset=['SMA Diff'])
+                 .map(rsi_color, subset=['RSI'])
+                 .map(bollinger_color, subset=['Bollinger %']) 
+                 .map(ema_color, subset=['EMA Diff'])
+                 .map(macd_color, subset=['MACD Diff'])
+                 .map(atr_color, subset=['Risk']))
+
+
+
 
 
 ## plot the data
@@ -185,27 +200,76 @@ else:
     ax.plot(data.index, data['Close'], label=f'Close Price \u25BC {price_change}%', color='#ff4d4d')
 
 
+
+
 # plot the selected indicators, if any are selected
 if 'SMA' in selected_indicators:
 
     ax.plot(data_sma_100.index, data_sma_100, label='100 Day SMA', color='#f000ff',linestyle='dashdot')
     ax.plot(data_sma_30.index, data_sma_30, label='30 Day SMA', color="#ffc800", linestyle='dashdot')
 
+    if crossover_data_sma is not None:  
+
+        for date, ctype in zip(crossover_data_sma, crossover_type_sma):
+
+            if ctype == 'Golden Cross':
+                # there was some trouble with plotting the markers directly on the date, so I had to find the closest date in the data index
+                # very hacky but it works
+
+                closest_date = data.index.get_indexer([date], method='nearest')
+                ax.plot(data.index[closest_date][0], data.loc[data.index[closest_date][0], 'Close'],
+                            marker='^', color='gold', markersize=15 , zorder=5)
+                
+            elif ctype == 'Death Cross':
+
+                closest_date = data.index.get_indexer([date], method='nearest')
+                ax.plot(data.index[closest_date][0], data.loc[data.index[closest_date][0], 'Close'],
+                            marker='v', color='black', markersize=15, zorder=5)
+
+
+
+
 if 'Bollinger Bands' in selected_indicators:
 
     ax.plot(upper_band.index, upper_band, label='Upper Bollinger Band', color='limegreen', linestyle='--')
     ax.plot(lower_band.index, lower_band, label='Lower Bollinger Band', color='red', linestyle='--')
+
+
+
 
 if 'EMA' in selected_indicators:
 
     ax.plot(ema_12.index, ema_12, label='12 Day EMA', color="#99f5ff", linestyle='dotted')
     ax.plot(ema_26.index, ema_26, label='26 Day EMA', color='#ff00ff', linestyle='dotted')
 
-if 'MACD' in selected_indicators:
+    if crossover_data_ema is not None:
 
+        for date, ctype in zip(crossover_data_ema, crossover_type_ema):
+
+            if ctype == 'Golden Cross':
+                closest_date = data.index.get_indexer([date], method='nearest')
+                ax.plot(data.index[closest_date][0], data.loc[data.index[closest_date][0], 'Close'],
+                            marker='^', color='cyan', markersize=15)
+                
+            elif ctype == 'Death Cross':
+
+                closest_date = data.index.get_indexer([date], method='nearest')
+                ax.plot(data.index[closest_date][0], data.loc[data.index[closest_date][0], 'Close'],
+                            marker='v', color='magenta', markersize=15)
+                
+
+
+
+
+if 'MACD' in selected_indicators:
+    
     ax2.plot(macd_line.index, macd_line, label='MACD Line', color='#00ff00')
     ax2.plot(signal_line.index, signal_line, label='Signal Line', color='#ff0000')
     ax2.axhline(0, color='grey', linestyle='--')
+    ax2.set_ylabel('MACD')
+
+
+
 
 if 'RSI' in selected_indicators:
 
@@ -214,6 +278,7 @@ if 'RSI' in selected_indicators:
     ax2.axhline(30, color='limegreen', linestyle='--')
     ax2.fill_between(rsi.index, rsi, 70, where=(rsi >= 70), color='red', alpha=0.3)
     ax2.fill_between(rsi.index, rsi, 30, where=(rsi <= 30), color='limegreen', alpha=0.3)
+    ax2.set_ylabel('RSI')
 
 
 
@@ -238,6 +303,22 @@ else:
     st.warning(f'Verdict: {verdict}. According to the indicators, it might be best to hold {stock} for now.')
 
 
+if atr is not None:
+    
+    if atr > 70:
+
+        st.error(f'Risk (ATR): {atr:.2f}%. The stock seems highly volatile. Investing in it could be a huge rist.')
+
+    elif atr > 40 and atr <= 70:
+
+        st.warning(f'Risk (ATR): {atr:.2f}%. The stock seems volatile. Investing in it could be a risk.')
+
+    elif atr > 20 and atr <= 40:
+
+        st.info(f'Risk (ATR): {atr:.2f}%. The stock seems somewhat volatile. Investing in it could be a moderate risk.')
+
+    else:
+        st.success(f'Risk (ATR): {atr:.2f}%. The stock seems not very volatile. Investing in it should be relatively safe.')
 
 
 # create steamlit plot
