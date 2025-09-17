@@ -92,5 +92,6 @@ def macd(data, short_window=12, long_window=26, signal_window=9):
     return macd_line, signal_line
 
 
+
 # Further indicators can be added here in the future
 
