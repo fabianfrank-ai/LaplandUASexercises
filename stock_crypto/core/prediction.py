@@ -9,25 +9,42 @@ import pandas as pd
 
 
 class Prediction:
-    '''
-    This class contains the prediction logic, it needs data, calculate the indicators, scales them, adds weights and
-    adds it to the current price
-    '''
+    """
+    Generates a simple predictive estimate of future stock prices using technical indicators.
+
+    The prediction is based on a weighted combination of SMA, EMA, RSI, Bollinger Bands, and MACD signals.
+    The calculated trend score is applied to the last closing price to project future prices.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Historical stock data containing at least the 'Close' column.
+    timeframe : int
+        Number of trading days to predict into the future.
+    """
 
     def __init__(self, data, timeframe):
         self.data = data
         self.timeframe = timeframe
 
+        # run the prediction immediately upon initialization
         self.prediction()
 
     def retreive_data(self):
-        '''
-        It takes the data, calculates the indicators, scales them and creates a trend score, 
-        indicating price movement for the day after
-        '''
+        """
+        Calculate indicator-based trend score for the latest data point.
+
+        Steps:
+        1. Compute SMA, EMA, RSI, Bollinger Bands, and MACD indicators.
+        2. Align SMAs and EMAs to calculate relative differences.
+        3. Convert indicators into discrete scores (-1, 0, 1) based on thresholds.
+        4. Combine weighted scores into a single trend_score.
+        """
+
         indicators = Indicators(self.data)
         # I explained the idea in the notebook in notebooks/
 
+        # Compute technical indicators
         sma_short = indicators.sma(30)
         sma_long = indicators.sma(100)
         ema_short = indicators.ema(12)
@@ -36,6 +53,7 @@ class Prediction:
         lower_band, upper_band = indicators.bollinger_bands(30)
         macd_line, signal_line = indicators.macd()
 
+        # Align moving averages for safe difference calculation
         sma_short, sma_long = sma_short.align(sma_long, join='inner')
         sma_diff = (sma_short - sma_long) / sma_long
 
@@ -44,6 +62,7 @@ class Prediction:
 
         # if a desired indicator is good, it's score is 1, otherwise -1
 
+        # RSI scoring: overbought -> 1, oversold -> -1, neutral -> 0
         if rsi_14.iloc[-1] > 70:
             rsi_score = 1
 
@@ -53,6 +72,7 @@ class Prediction:
         else:
             rsi_score = 0
 
+        # Bollinger Bands scoring: near lower band -> -1, above mid-point -> 1, else 0
         bollinger_percentage = (self.data['Close'].iloc[-1] - lower_band.iloc[-1]
                                 ) / (upper_band.iloc[-1] - lower_band.iloc[-1])
 
@@ -65,6 +85,7 @@ class Prediction:
         else:
             bb_score = 0
 
+        # MACD scoring: bullish -> 1, bearish -> -1, neutral -> 0
         if macd_line.iloc[-1] > signal_line.iloc[-1]:
             macd_score = 1
 
@@ -74,12 +95,24 @@ class Prediction:
         else:
             macd_score = 0
 
-        # weights are chosen of personal opinion, might change later
+        # Combine weighted scores into a single trend score
+        # Weights chosen heuristically; can be tuned based on performance
         self.trend_score = sma_diff.iloc[-1] * 0.25 + ema_diff.iloc[-1] * \
             0.25 + rsi_score * 0.2 + bb_score * 0.2 + macd_score * 0.2
 
     def prediction(self):
-        '''Create a rough estimate of how the future price might develop'''
+        """
+        Generate predicted future prices based on the trend score.
+
+        Steps:
+        1. Copy original data to avoid overwriting.
+        2. Calculate rolling 30-day standard deviation to scale predictions.
+        3. Iteratively predict 'timeframe' future days:
+           - Compute trend score using retreive_data().
+           - Adjust last closing price using trend_score * scaled std.
+           - Append new predicted price as a new row with the next business day index.
+        """
+
         # copy data to avoid modifying original dataframe
         self.data_pred = self.data.copy()
 
