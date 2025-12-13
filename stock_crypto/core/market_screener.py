@@ -243,7 +243,7 @@ class Heatmaps:
     # return the dataframe
         return df
 
-    def heatmap_portfolio(portfolio: pd.DataFrame) -> pd.Dataframe:
+    def heatmap_portfolio(portfolio: pd.DataFrame) -> pd.DataFrame:
         """
         Generate a DataFrame of a custom portfolio of tickers with technical indicators.
 
