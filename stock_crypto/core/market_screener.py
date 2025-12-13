@@ -5,6 +5,7 @@ network Graphing
 
 '''
 import pandas as pd
+import traceback
 import numpy as np
 import urllib.request
 from data.fetch_data import stock_data
@@ -34,13 +35,31 @@ def get_tickers():
     # wikipedia uses dots in some ticker symbols, but yfinance needs dashes (e.g. BF.B -> BF-B)
     sp500_tickers = [t.replace(".", "-") for t in sp500_tickers]
 
-    # fetch data for all tickers at once to improve performance
-    ticker_dataframe = stock_data.fetch_multiple_stocks_data(
-        sp500_tickers, period="6mo", interval='1d')
-    dfs = {
-        # create a dictionary of dataframes for each ticker
-        ticker: ticker_dataframe[ticker] for ticker in sp500_tickers if ticker in ticker_dataframe.columns.get_level_values(0)
-    }
+    return sp500_tickers
+
+
+def get_dataframe(tickers, start, end):
+    '''
+    Here I have a function that turns the tickers(Here: S&P500 tickers) into a dataframe for easier handling in heatmaps and correlations, 
+    as this approach is infinetly faster than fetching the stocks in a loop
+    '''
+    if start is None and end is None:
+        # fetch data for all tickers at once to improve performance
+        ticker_dataframe = stock_data.fetch_multiple_stocks_data(
+            tickers, period="6mo", interval='1d')
+        dfs = {
+            # create a dictionary of dataframes for each ticker
+            ticker: ticker_dataframe[ticker] for ticker in tickers if ticker in ticker_dataframe.columns.get_level_values(0)
+        }
+    else:
+        # fetch data for all tickers at once to improve performance
+        ticker_dataframe = stock_data.fetch_multiple_stocks_data_set_dates(
+            tickers, start, end)
+        dfs = {
+            # create a dictionary of dataframes for each ticker
+            ticker: ticker_dataframe[ticker] for ticker in tickers if ticker in ticker_dataframe.columns.get_level_values(0)
+        }
+
     return dfs
 
 
@@ -50,29 +69,26 @@ def heatmap(start, end):
     Also calculates indicators and stuff like that and adds them to the dataframe.
     """
 
-    ticker_data = []
-    change_data = []
-    verdict = []
-    sma_data = []
-    bollinger_data = []
-    rsi_data = []
-    ema_data = []
-    macd_data = []
-    atr_data = []
+    # create an empty list, to append the rows as dict into a dataframe later
+    rows = []
 
-    dfs = get_tickers()
+    sp500_tickers = get_tickers()
+    dfs = get_dataframe(sp500_tickers, start, end)
 
     # for every ticker in sp500(whatever is in the dataframe)
     for ticker in list(dfs.keys()):
+        data = dfs[ticker]
+
         try:
 
             # fetch data, depending on whether start and end dates are provided (for database or not)
             if start is None and end is None:
-                data = dfs[ticker]
+                # initialize indicators
                 indicators = Indicators(data)
 
-                sma_percentage = (
-                    indicators.sma(30).iloc[-1] - indicators.sma(100).iloc[-1]) / indicators.sma(100).iloc[-1] * 100
+                window_long = 100
+                window_short = 30
+
                 latest_close = data['Close'].iloc[-1]
                 previous_close = data['Close'].iloc[-2]
                 latest_change = (
@@ -80,18 +96,17 @@ def heatmap(start, end):
                 latest_change = round(latest_change, 2)
 
             else:
-                # use the provided dates to fetch data
-                data = stock_data.fetch_stock_data_set_dates(
-                    ticker, start=start, end=end)
+                # initialise indicators with the fetched data
                 indicators = Indicators(data)
-                # calculate sma percentages based on shorter timeframes, due to the length of a quartal
-                sma_percentage = (
-                    indicators.sma(20).iloc[-1] - indicators.sma(50).iloc[-1]) / indicators.sma(50).iloc[-1] * 100
+
+                # adjust the window ranges because a quarter doesn't have as many possible dates to get data from
+                window_long = 50
+                window_short = 20
+
                 # calculate the change from the first to the last available data point, for more meaningful results
                 latest_close = data['Close'].iloc[-1]
                 previous_close = data['Close'].iloc[0]
-                latest_change = (
-                    (latest_close - previous_close) / previous_close) * 100
+                latest_change = indicators.price_change()
                 latest_change = round(latest_change, 2)
 
             # check if data is valid
@@ -99,10 +114,8 @@ def heatmap(start, end):
                 print(f"Not enough data for {ticker}")
                 continue
 
-            # append all the data to the respective lists
-            ticker_data.append(ticker)
-            change_data.append(latest_change)
-
+            sma_percentage = (
+                indicators.sma(window_short).iloc[-1] - indicators.sma(window_long).iloc[-1]) / indicators.sma(window_long).iloc[-1] * 100
             ema_percentage = (
                 indicators.ema(12).iloc[-1] - indicators.ema(26).iloc[-1]) / indicators.ema(26).iloc[-1] * 100
             ema_percentage = round(ema_percentage, 2)
@@ -112,46 +125,42 @@ def heatmap(start, end):
             macd_difference = macd_line.iloc[-1] - signal_line.iloc[-1]
             macd_difference = round(macd_difference, 2)
 
-            # calculate indicators for the ticker and append the relevant data to the respective lists
-            sma_data.append(sma_percentage)
             lower_band, upper_band = indicators.bollinger_bands()
             bollinger_percentage = (
                 data['Close'].iloc[-1] - lower_band.iloc[-1]) / (upper_band.iloc[-1] - lower_band.iloc[-1])
             bollinger_percentage = round(bollinger_percentage, 2)
+
             rsi_value = indicators.rsi().iloc[-1]
+
             rsi_value = round(rsi_value, 2)
-
-            bollinger_data.append(bollinger_percentage)
-            rsi_data.append(rsi_value)
-            ema_data.append(ema_percentage)
-            macd_data.append(macd_difference)
-
-            # generate and append the verdict for the ticker
-            verdict_signal = Verdict(data, indicators.sma(100), indicators.sma(30),
-                                     indicators.ema(26), indicators.ema(12), indicators.rsi(), signal_line, macd_line, lower_band, upper_band, indicators.atr())
-            verdict.append(verdict_signal.verdict)
 
             atr_value = indicators.atr()
             atr_value = round(atr_value, 2)
-            atr_data.append(atr_value)
 
-            # create a dataframe from the lists
-            df = pd.DataFrame({
-                'Ticker': ticker_data,
-                'Change': change_data,
-                'SMA Diff': sma_data,
-                'Bollinger %': bollinger_data,
-                'RSI': rsi_data,
-                'EMA Diff': ema_data,
-                'MACD Diff': macd_data,
+            # generate and append the verdict for the ticker
+            verdict = Verdict(data, indicators.sma(window_long), indicators.sma(window_short),
+                              indicators.ema(26), indicators.ema(12), indicators.rsi(), signal_line, macd_line, lower_band, upper_band, atr_value)
+            verdict = verdict.verdict
+
+            rows.append({
+                'Ticker': ticker,
+                'Change': latest_change,
+                'SMA Diff': sma_percentage,
+                'Bollinger %': bollinger_percentage,
+                'RSI': rsi_value,
+                'EMA Diff': ema_percentage,
+                'MACD Diff': macd_difference,
                 'Verdict': verdict,
-                'Risk': atr_data
+                'Risk': atr_value
             })
 
         # Print any errors and continue with the next ticker
         except Exception as e:
             print(f"Error processing {ticker}: {e}")
             continue
+
+        # create a dataframe from the lists
+        df = pd.DataFrame(rows)
 
 
 # return the dataframe

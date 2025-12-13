@@ -12,7 +12,7 @@ import sqlite3
 
 
 from core.market_screener import correlations, heatmap
-from core.network_graphing import plot_network
+from core.network_graphing import network_graph
 
 
 def get_month_end(year, month):
@@ -33,7 +33,8 @@ def dataframe_to_parquet_network():
         end_date = get_month_end(year, month_start + 2)
 
         # calculate correlations
-        correlation_dataframe = correlations(start_date, end_date)
+        correlation_dataframe = network_graph.correlations(
+            start_date, end_date)
 
         correlation_dataframe.fillna(0)
         correlation_dataframe.clip(-1, 1)
@@ -82,7 +83,7 @@ def dataframe_to_parquet_heatmap():
 
 
 choice = input(
-    "What do you want to convert?\n -1 correlations \n -2 heatmaps \n -3 parquet \n - DO NOT USE, WORK IN PROGRESS: 4 to sql \n Enter number: ")
+    "What do you want to convert?\n -1 correlations \n -2 heatmaps ")
 
 if choice == '1':
     dataframe_to_parquet_network()
