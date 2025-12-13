@@ -11,7 +11,7 @@ from pathlib import Path
 import plotly.io as pio
 
 from core.prediction import Prediction
-from core.market_screener import heatmap, heatmap_portfolio, correlations
+from core.market_screener import Heatmaps, correlations
 from core.portfolio import generate_portfolio
 from GUI.colour_coding import color_coding_rules as crr
 from core.network_graphing import network_graph
@@ -123,6 +123,7 @@ class GUI:
 # Take input from the user via user_input(), like timeframes, stock tickers etc and get data from yfinance,
 # afterwards take the data and calculate the indicators, been in Main before that but now it's here
 # ======================================================================================================
+
 
     def prepare_data(self):
         '''
@@ -310,6 +311,7 @@ class GUI:
 #                               USER INPUT
 # Here the user can just enter his preferred values in everything he wants and get further opportunities to analyze it to his liking
 # ======================================================================================================================================
+
 
     def user_input(self):
         '''
@@ -615,7 +617,8 @@ class GUI:
                 # create a dataframe(pandas) with the heatmap function initialized in the data folder
                 with st.spinner('Generating heatmap... This may take a moment.'):
                     # input none none to not interfere with historical data
-                    st.session_state.heatmap_data = heatmap(None, None)
+                    st.session_state.heatmap_data = Heatmaps.heatmap(
+                        None, None)
 
                 st.write('S&P 500 Daily Change Percentage:')
 
@@ -708,7 +711,8 @@ class GUI:
         st.download_button(label="Download your portfolio as csv",
                            data=portfolio_csv, file_name="Portfolio.csv", mime="text/csv")
 
-        heatmap_portf = heatmap_portfolio(st.session_state.portfolio_df)
+        heatmap_portf = Heatmaps.heatmap_portfolio(
+            st.session_state.portfolio_df)
         heatmap_portf_csv = heatmap_portf.to_csv(
             index=False).encode('utf-8')
 
