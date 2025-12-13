@@ -10,23 +10,54 @@ import pandas as pd
 
 
 class Indicators:
-    '''
-    Class that contains all indicators, insert data in order to calculate indicators. 
-    For example indicatos = Indicators(data)
-                indicators.sma(window) in order to calculate an sma for a specific window
+    """
+    Calculate common technical indicators for a stock DataFrame.
 
-    Modular structure allows easy maintenance and more indicators can be added with ease  
-    '''
+    Parameters
+    ----------
+    data : pd.DataFrame
+        DataFrame containing stock data with columns ['Open', 'High', 'Low', 'Close', ...].
 
-    def __init__(self, data):
-        '''
-        Add data to self, so all indicators can access it if necessary
-        '''
+    Examples
+    --------
+    indicators = Indicators(data)
+    sma_30 = indicators.sma(30)
+    rsi_14 = indicators.rsi()
+    macd_line, signal_line = indicators.macd()
+
+    Notes
+    -----
+    - All methods operate on the 'Close' price column by default unless otherwise specified.
+    - Designed to be modular: new indicators can be added easily.
+    """
+
+    def __init__(self, data: pd.DataFrame):
+        """
+        Store stock data for indicator calculations.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Historical stock data for a single ticker.
+        """
 
         self.data = data
+# ==============================================================================================================================
 
-    def sma(self, window):
-        """Calculate Simple Moving Average (SMA)"""
+    def sma(self, window: int) -> pd.Series:
+        """
+        Calculate Simple Moving Average (SMA) over a given window.
+
+        Parameters
+        ----------
+        window : int
+            Number of periods to calculate the SMA.
+
+        Returns
+        -------
+        pd.Series
+            SMA values.
+        """
 
         # SMA = sum of closing prices over the window / window size (SMA30 and 100 are used, so window=100)
         # https://medium.com/analytics-vidhya/sma-short-moving-average-in-python-c656956a08f8
@@ -34,9 +65,23 @@ class Indicators:
 
         return sma
 
-    # , data, short_ma, long_ma)
-    def moving_average_crossover(self, short_ma, long_ma):
-        """Calculate Moving Average Crossover Signals"""
+  # ===========================================================================================================================
+    def moving_average_crossover(self, short_ma: pd.Series, long_ma: pd.Series) -> pd.Series:
+        """
+        Identify moving average crossovers: Golden Crosses and Death Crosses.
+
+        Parameters
+        ----------
+        short_ma : pd.Series
+            Short-term moving average.
+        long_ma : pd.Series
+            Long-term moving average.
+
+        Returns
+        -------
+        pd.Series
+            Series of crossover types ('Golden Cross' or 'Death Cross') indexed by date.
+        """
 
         # empty DataFrame to store crossover signals
         crossings = pd.DataFrame()
@@ -60,9 +105,22 @@ class Indicators:
                 'Date', 'Crossover Type']).set_index('Date')
 
         return crossings['Crossover Type']
+# ==============================================================================================================================================
 
-    def bollinger_bands(self, window=30):
-        """Calculate Bollinger Bands"""
+    def bollinger_bands(self, window: int = 30) -> tuple[pd.Series, pd.Series]:
+        """
+        Calculate Bollinger Bands.
+
+        Parameters
+        ----------
+        window : int
+            Rolling window for SMA and standard deviation.
+
+        Returns
+        -------
+        tuple[pd.Series, pd.Series]
+            (lower_band, upper_band)
+        """
 
         # Bollinger Bands consist of a middle band (SMA), an upper band, and a lower band.
         # The upper band is typically 2 standard deviations above the SMA, and the lower band is 2 standard deviations below the SMA.
@@ -75,9 +133,22 @@ class Indicators:
         lower_band = sma - (std * 2)
 
         return lower_band, upper_band
+# ================================================================================================================================================
 
-    def rsi(self, window=14):
-        """Calculate Relative Strength Index (RSI)"""
+    def rsi(self, window: int = 14) -> pd.Series:
+        """
+        Calculate Relative Strength Index (RSI).
+
+        Parameters
+        ----------
+        window : int
+            Lookback period for gains and losses.
+
+        Returns
+        -------
+        pd.Series
+            RSI values (0-100 scale).
+        """
 
         # RSI = 100 - (100 / (1 + RS))
         # RS = Average Gain / Average Loss over the specified window
@@ -89,27 +160,55 @@ class Indicators:
         rsi = 100 - (100 / (1 + rs))
 
         return rsi
+# ===================================================================================================================================================
 
-    def price_change(self):
-        """Calculate Price Change Percentage"""
+    def price_change(self) -> float:
+        """
+        Calculate overall price change percentage for the data.
+
+        Returns
+        -------
+        float
+            Price change between first and last closing price, rounded to 2 decimals.
+        """
 
         # Price Change Percentage = ((Current Price - Previous Price) / Previous Price) * 100
         price_change = (
             (self.data['Close'].iloc[-1] - self.data['Close'].iloc[0]) / self.data['Close'].iloc[0]) * 100
 
         return price_change.round(2)
+# =================================================================================================================================================
 
-    def ema(self, window):
-        """Calculate Exponential Moving Average (EMA)"""
+    def ema(self, window: int) -> pd.Series:
+        """
+        Calculate Exponential Moving Average (EMA).
 
+        Parameters
+        ----------
+        window : int
+            Lookback period for EMA.
+
+        Returns
+        -------
+        pd.Series
+            EMA values.
+        """
         # EMA gives more weight to recent prices, making it more responsive to new information.
         # EMA_today = (Price_today * (smoothing / (1 + window))) + (EMA_yesterday * (1 - (smoothing / (1 + window))))
         # A common smoothing factor is 2.
         ema = self.data['Close'].ewm(span=window, adjust=False).mean()
         return ema
+# =================================================================================================================================================
 
-    def macd(self, short_window=12, long_window=26, signal_window=9):
-        """Calculate Moving Average Convergence Divergence (MACD)"""
+    def macd(self, short_window: int = 12, long_window: int = 26, signal_window: int = 9) -> tuple[pd.Series, pd.Series]:
+        """
+        Calculate MACD and Signal Line.
+
+        Returns
+        -------
+        tuple[pd.Series, pd.Series]
+            (macd_line, signal_line)
+        """
 
         # MACD = 12-day EMA - 26-day EMA
         # Signal Line = 9-day EMA of MACD
@@ -121,8 +220,21 @@ class Indicators:
 
         return macd_line, signal_line
 
-    def atr(self, window=14):
-        """Average true range"""
+# ====================================================================================================================================================
+    def atr(self, window: int = 14) -> float:
+        """
+        Calculate Average True Range (ATR) scaled to 0-100.
+
+        Parameters
+        ----------
+        window : int
+            Lookback period for ATR calculation.
+
+        Returns
+        -------
+        float
+            ATR value representing recent volatility.
+        """
 
         # Average true range is an indicator for market volatility and therefore risk
 

@@ -22,7 +22,7 @@ class get_data:
       and return it as a dictionary of DataFrames.
     """
 
-    def get_tickers():
+    def get_tickers() -> list[str]:
         """
         Retrieve the list of S&P 500 tickers from Wikipedia.
 
@@ -57,7 +57,7 @@ class get_data:
 
         return sp500_tickers
 
-    def get_dataframe(tickers, start, end):
+    def get_dataframe(tickers: list[str], start, end) -> dict[str, pd.DataFrame]:
         """
         Fetch historical stock data for multiple tickers and organize it into a dictionary.
 
@@ -115,7 +115,7 @@ class Heatmaps:
             Compute indicators and metrics for a specific portfolio of tickers.
         """
 
-    def heatmap(start, end):
+    def heatmap(start, end) -> pd.DataFrame:
         """
             Generate a DataFrame with key performance indicators for S&P 500 companies.
 
@@ -243,7 +243,7 @@ class Heatmaps:
     # return the dataframe
         return df
 
-    def heatmap_portfolio(portfolio):
+    def heatmap_portfolio(portfolio: pd.DataFrame) -> pd.Dataframe:
         """
         Generate a DataFrame of a custom portfolio of tickers with technical indicators.
 
@@ -337,7 +337,7 @@ class Heatmaps:
         return df
 
 
-def correlations(start, end):
+def correlations(start, end) -> pd.DataFrame:
     """
     Calculate pairwise correlations of S&P 500 stock movements over a given timeframe.
 
