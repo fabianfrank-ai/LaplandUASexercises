@@ -6,19 +6,35 @@ Evaluates trend direction, price relative to averages, and crossover behavior.
 
 class ma_verdict:
     """
-    Produces market verdicts using EMA and SMA analysis.
+    Produces a market verdict score using moving average analysis.
 
-    This class examines how price interacts with one or more moving averages,
-    evaluates their slope and trend strength, and interprets crossover events
-    between EMAs, SMAs, or mixed pairs to assess momentum and trend direction.
+    This class examines:
+    - Price relative to short and long moving averages
+    - Trend strength and slope of moving averages
+    - Crossover events (golden/death crosses)
+
+    The resulting `buyer_score` reflects bullish or bearish momentum.
     """
 
     def __init__(self, price, ma_short, ma_long):
-        '''Initialize the ma_verdict class with necessary indicators.'''
+        """
+        Initialize the MA verdict with current price and moving averages.
+
+        Parameters
+        ----------
+        price : float
+            Current closing price.
+        ma_short : pd.Series
+            Short-term moving average series.
+        ma_long : pd.Series
+            Long-term moving average series.
+        """
+
         self.ma_short = ma_short
         self.ma_long = ma_long
         self.price = price
 
+        # aggregates scores from different ma-based signals
         buyer_score = 0
         buyer_score = self.difference_verdict()
         buyer_score += self.change_verdict()
@@ -27,16 +43,38 @@ class ma_verdict:
         self.buyer_score = buyer_score
 
     def get_difference(self, price, ma):
-        '''Calculate the percentage difference between two values.'''
+        """
+        Calculate the percentage difference between a price and a moving average.
+
+        Parameters
+        ----------
+        price : float
+            Current price.
+        ma : float
+            Moving average value.
+
+        Returns
+        -------
+        float
+            Percentage difference between price and MA.
+        """
+
         return ((price - ma) / ma) * 100
 
     def difference_verdict(self):
-        '''
-        Generate verdict based on the difference between short and long moving averages.
+        """
+        Generate verdict based on difference between price and moving averages.
 
-        If the difference between a ma and the current price is high, we generally think that there is more momentum in 
-        movement and therefore a buy signal will be ommited.
-        '''
+        Logic:
+        - Large positive difference → strong bullish momentum
+        - Large negative difference → strong bearish momentum
+        - Different thresholds for short vs. long MA due to volatility differences
+
+        Returns
+        -------
+        int
+            Buyer score contribution from price-MA differences.
+        """
 
         buyer_score = 0
         # Calculate the percentage differences
@@ -71,10 +109,18 @@ class ma_verdict:
         return buyer_score
 
     def change_verdict(self):
-        '''
-        Generate verdict based on the change in moving averages.
-        If moving averages change within the last day in either of the directions we give a small nudge signal basically
-        '''
+        """
+        Generate verdict based on daily change of moving averages.
+
+        Logic:
+        - Positive change → small bullish signal
+        - Negative change → small bearish signal
+
+        Returns
+        -------
+        int
+            Buyer score contribution from MA trend changes.
+        """
         buyer_score = 0
         # Calculate the changes in moving averages
         short_change = self.ma_short.iloc[-1] - self.ma_short.iloc[-2]
@@ -94,11 +140,18 @@ class ma_verdict:
         return buyer_score
 
     def crossover_verdict(self):
-        '''
-        Generate verdict based on moving average crossover.
-        If golden/deatb cross is seen, we take that into consideration by giving a huge signal, as it 
-        is the clearest indicator for buy we have
-        '''
+        """
+        Generate verdict based on moving average crossovers.
+
+        Logic:
+        - Golden cross (short MA crosses above long MA) → strong bullish (+5)
+        - Death cross (short MA crosses below long MA) → strong bearish (-5)
+
+        Returns
+        -------
+        int
+            Buyer score contribution from crossover signals.
+        """
         buyer_score = 0
         # Check for crossover -> very strong buy/sell signal
 
