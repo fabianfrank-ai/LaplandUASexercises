@@ -1,7 +1,7 @@
 pandas
 datetime
 matplotlib
-streamlit
+streamlit==1.53.0
 yfinance
 lxml
 scikit-learn
