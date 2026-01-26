@@ -9,6 +9,7 @@ networkx
 plotly
 python-louvain
 scipy
+altair<5
 
 pyarrow
 fastparquet
